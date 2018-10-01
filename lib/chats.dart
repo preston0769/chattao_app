@@ -53,6 +53,7 @@ class ChatScreenState extends State<ChatScreen> {
 
   String peerId;
   String peerAvatar;
+  String myAvatar;
   String id;
 
   var listMessage;
@@ -100,6 +101,8 @@ class ChatScreenState extends State<ChatScreen> {
     } else {
       groupChatId = '$peerId-$id';
     }
+
+    myAvatar = prefs.getString('photoUrl') ?? '';
 
     setState(() {});
   }
@@ -244,8 +247,29 @@ class ChatScreenState extends State<ChatScreen> {
                           bottom: isLastMessageRight(index) ? 20.0 : 10.0,
                           right: 10.0),
                     ),
+          Container(
+            height: 32.0,
+            width: 32.0,
+            color: Colors.red,
+            child: CachedNetworkImage(
+              placeholder: Container(
+                child: CircularProgressIndicator(
+                  strokeWidth: 1.0,
+                  valueColor: AlwaysStoppedAnimation<Color>(themeColor),
+                ),
+                width: 35.0,
+                height: 35.0,
+                padding: EdgeInsets.all(10.0),
+              ),
+              imageUrl: myAvatar??"http://nothing.com/gag",
+              width: 35.0,
+              height: 35.0,
+              fit: BoxFit.cover,
+            ),
+          ),
         ],
         mainAxisAlignment: MainAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.start,
       );
     } else {
       // Left (peer message)
@@ -253,6 +277,7 @@ class ChatScreenState extends State<ChatScreen> {
         child: Column(
           children: <Widget>[
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 isLastMessageLeft(index)
                     ? Material(
@@ -368,6 +393,7 @@ class ChatScreenState extends State<ChatScreen> {
   }
 
   bool isLastMessageLeft(int index) {
+    return true;
     if ((index > 0 &&
             listMessage != null &&
             listMessage[index - 1]['idFrom'] == id) ||

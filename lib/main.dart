@@ -11,11 +11,11 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return new MaterialApp(
       theme: ThemeData(
-         brightness: Brightness.light,
-         primaryColor: Colors.amberAccent
+        brightness: Brightness.light,
+        primaryColor: Color(0xFF17CDBB),
       ),
-      title: 'TaoTao ChatApp',
-      home: const MyHomePage(title: 'TaoTao ChatApp'),
+      title: 'Tao Chat',
+      home: const MyHomePage(title: 'Tao Chat'),
     );
   }
 }
@@ -36,19 +36,12 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    activeScreen = LoginPage(onBtnClick: (String userId) {
-      setState(() {
-        activeScreen = FriendsPage(currentUserId: userId,onLogOut:(){
-        });
-      });
-    });
+    activeScreen = LoginPage();
   }
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-        appBar: new AppBar(title: new Text(widget.title)), body: activeScreen);
+    return new Scaffold(body: activeScreen);
   }
 }

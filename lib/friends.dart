@@ -10,13 +10,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class FriendsPage extends StatelessWidget {
   String currentUserId;
-  VoidCallback onLogOut;
-  FriendsPage({@required this.currentUserId,@required this.onLogOut}){
-  }
+  FriendsPage({@required this.currentUserId}) {}
 
   Future<SharedPreferences> _getPreference() async {
     var prefs = await SharedPreferences.getInstance();
-
     return prefs;
   }
 
@@ -43,14 +40,18 @@ class FriendsPage extends StatelessWidget {
         key: new ValueKey(document.documentID),
         title: new Container(
           decoration: new BoxDecoration(
-            border: new Border.all(color: const Color(0x80000000)),
-            borderRadius: new BorderRadius.circular(5.0),
+            border: new Border(
+                bottom: BorderSide(
+                    width: 1.0,
+                    color: const Color(0x88888888),
+                    style: BorderStyle.solid)),
+            // borderRadius: new BorderRadius.circular(5.0),
           ),
           padding: const EdgeInsets.all(10.0),
           child: new Row(
             children: <Widget>[
               ClipRRect(
-                borderRadius: BorderRadius.all(Radius.circular(30.0)),
+                borderRadius: BorderRadius.all(Radius.circular(8.0)),
                 child: CachedNetworkImage(
                   placeholder: Container(
                     child: CircularProgressIndicator(
@@ -88,47 +89,97 @@ class FriendsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
+    return WillPopScope(
+      child: Scaffold(
+        appBar: new AppBar(
+          title: new Text("Friends"),
+           leading: Container(),
+          actions: <Widget>[
+            Padding(
+                padding: EdgeInsets.only(right: 16.0), child: Icon(Icons.add))
+          ],
+        ),
+        backgroundColor: Color(0xFFBFBFBF),
+        body: SafeArea(
           child: Column(
-        children: <Widget>[
-          Expanded(
-            child: new StreamBuilder(
-                stream: Firestore.instance.collection('users').snapshots(),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData)
-                    return Center(
-                      child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
-                      ),
-                    );
-                  return new ListView.builder(
-                      itemCount: snapshot.data.documents.length,
-                      padding: const EdgeInsets.only(top: 10.0),
-                      // itemExtent: 25.0,
-                      itemBuilder: (context, index) {
-                        DocumentSnapshot ds = snapshot.data.documents[index];
-                        if (ds.documentID == currentUserId) return Container();
-                        return _buildListItem(context, ds);
-                      });
-                }),
+            children: <Widget>[
+              Container(
+                padding: EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 0.0),
+                child: TextField(
+                  decoration: InputDecoration(
+                    enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(style: BorderStyle.none)),
+                    contentPadding: EdgeInsets.all(0.0),
+                    prefixIcon: Icon(
+                      Icons.search,
+                      color: Colors.black,
+                    ),
+                    fillColor: Colors.white.withAlpha(140),
+                    filled: true,
+                    border: OutlineInputBorder(
+                        borderSide: BorderSide(
+                            color: Colors.transparent,
+                            width: 1.0,
+                            style: BorderStyle.none),
+                        borderRadius: BorderRadius.circular(8.0)),
+                    hintText: "Search friend",
+                  ),
+                ),
+              ),
+              Expanded(
+                child: new StreamBuilder(
+                    stream: Firestore.instance.collection('users').snapshots(),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData)
+                        return Center(
+                          child: CircularProgressIndicator(
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.red),
+                          ),
+                        );
+                      return new ListView.builder(
+                          itemCount: snapshot.data.documents.length,
+                          padding: const EdgeInsets.only(top: 10.0),
+                          // itemExtent: 25.0,
+                          itemBuilder: (context, index) {
+                            DocumentSnapshot ds =
+                                snapshot.data.documents[index];
+                            if (ds.documentID == currentUserId)
+                              return Container();
+                            return _buildListItem(context, ds);
+                          });
+                    }),
+              ),
+              Center(
+                child: Container(
+                  decoration: BoxDecoration(boxShadow: [
+                    BoxShadow(
+                        color: Colors.grey,
+                        offset: Offset(0.0, 3.0),
+                        blurRadius: 8.0)
+                  ]),
+                  child: FlatButton(
+                    padding: EdgeInsets.fromLTRB(48.0, 16.0, 48.0, 16.0),
+                    color: Theme.of(context).primaryColor,
+                    onPressed: () {
+                      final GoogleSignIn googleSignIn = new GoogleSignIn();
+                      final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
+                      googleSignIn.signOut();
+                      firebaseAuth.signOut();
+                      Navigator.pop(context);
+                    },
+                    child: Text(
+                      "Log out",
+                      style: TextStyle(color: Colors.white, fontSize: 18.0),
+                    ),
+                  ),
+                ),
+              )
+            ],
           ),
-          Center(
-            child: FlatButton(
-              padding: EdgeInsets.all(16.0),
-              color: Theme.of(context).primaryColor,
-              onPressed: () {
-                final GoogleSignIn googleSignIn = new GoogleSignIn();
-                final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
-                googleSignIn.signOut();
-                firebaseAuth.signOut();
-                onLogOut();
-                
-              },
-              child: Text("Log out"),
-            ),
-          )
-        ],
+        ),
       ),
+      onWillPop: () {},
     );
   }
 }
