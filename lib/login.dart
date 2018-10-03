@@ -80,7 +80,7 @@ class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: new AppBar(title: new Text("Login")),
+      appBar: new AppBar(title: new Text("Login",style: TextStyle(color:Colors.white),)),
       backgroundColor: Color(0xFFBFBFBF),
       body: Center(
         child: IntrinsicWidth(

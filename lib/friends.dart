@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:chattao_app/chats.dart';
+import 'package:chattao_app/constants.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -32,6 +33,7 @@ class FriendsPage extends StatelessWidget {
             builder: (context) => new Chat(
                   peerId: document.documentID,
                   peerAvatar: document['photoUrl'],
+                  peerName: document['name'],
                 )));
   }
 
@@ -87,18 +89,62 @@ class FriendsPage extends StatelessWidget {
         });
   }
 
+  _buildBottomNavBar(BuildContext context) {
+    return Material(
+      color: themeColor,
+      child: SafeArea(
+        child: Container(
+            padding: EdgeInsets.only(top: 8.0),
+            constraints: BoxConstraints(maxHeight: 50.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: <Widget>[
+                NavBarItem(
+                  iconData: Icons.chat,
+                  title: "Chat",
+                  isFocused: true,
+                ),
+                NavBarItem(iconData: Icons.import_contacts, title: "Contacts"),
+                NavBarItem(
+                  iconData: Icons.notification_important,
+                  title: "Requests",
+                  onTap: () {
+                    _handleLogout(context);
+                  },
+                ),
+                NavBarItem(
+                    iconData: Icons.location_searching, title: "Discover"),
+                NavBarItem(iconData: Icons.portrait, title: "Me"),
+              ],
+            )),
+      ),
+    );
+  }
+
+  _handleLogout(BuildContext context) {
+    final GoogleSignIn googleSignIn = new GoogleSignIn();
+    final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
+    googleSignIn.signOut();
+    firebaseAuth.signOut();
+    Navigator.pop(context);
+  }
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
       child: Scaffold(
         appBar: new AppBar(
-          title: new Text("Friends"),
-           leading: Container(),
+          title: new Text(
+            "TaoChat",
+            style: TextStyle(color: Colors.white),
+          ),
+          leading: Container(),
           actions: <Widget>[
             Padding(
                 padding: EdgeInsets.only(right: 16.0), child: Icon(Icons.add))
           ],
         ),
+        bottomNavigationBar: _buildBottomNavBar(context),
         backgroundColor: Color(0xFFBFBFBF),
         body: SafeArea(
           child: Column(
@@ -150,36 +196,46 @@ class FriendsPage extends StatelessWidget {
                           });
                     }),
               ),
-              Center(
-                child: Container(
-                  decoration: BoxDecoration(boxShadow: [
-                    BoxShadow(
-                        color: Colors.grey,
-                        offset: Offset(0.0, 3.0),
-                        blurRadius: 8.0)
-                  ]),
-                  child: FlatButton(
-                    padding: EdgeInsets.fromLTRB(48.0, 16.0, 48.0, 16.0),
-                    color: Theme.of(context).primaryColor,
-                    onPressed: () {
-                      final GoogleSignIn googleSignIn = new GoogleSignIn();
-                      final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
-                      googleSignIn.signOut();
-                      firebaseAuth.signOut();
-                      Navigator.pop(context);
-                    },
-                    child: Text(
-                      "Log out",
-                      style: TextStyle(color: Colors.white, fontSize: 18.0),
-                    ),
-                  ),
-                ),
-              )
             ],
           ),
         ),
       ),
       onWillPop: () {},
+    );
+  }
+}
+
+class NavBarItem extends StatelessWidget {
+  final IconData iconData;
+  final String title;
+  final bool isFocused;
+  final VoidCallback onTap;
+
+  NavBarItem(
+      {@required this.iconData,
+      @required this.title,
+      this.isFocused = false,
+      this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap ?? onTap,
+      child: Container(
+        child: Column(
+          children: <Widget>[
+            Icon(
+              iconData,
+              color: isFocused ? Colors.orangeAccent : Colors.white,
+            ),
+            Text(
+              title,
+              style: TextStyle(
+                  color: isFocused ? Colors.orangeAccent : Colors.white),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
