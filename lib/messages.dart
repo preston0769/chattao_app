@@ -126,14 +126,15 @@ class StickerMessageContent extends StatelessWidget {
 
 class ChatAvatar extends StatelessWidget {
   final String avatarUrl;
+  final double widgetHeight;
 
-  ChatAvatar({this.avatarUrl});
+  ChatAvatar({this.avatarUrl,this.widgetHeight = 32.0});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context,) {
     return Container(
-      height: 32.0,
-      width: 32.0,
+      height: widgetHeight,
+      width: widgetHeight,
       color: themeColor,
       child: CachedNetworkImage(
         placeholder: Container(
@@ -141,13 +142,13 @@ class ChatAvatar extends StatelessWidget {
             strokeWidth: 1.0,
             valueColor: AlwaysStoppedAnimation<Color>(themeColor),
           ),
-          width: 35.0,
-          height: 35.0,
+          width: widgetHeight,
+          height: widgetHeight,
           padding: EdgeInsets.all(10.0),
         ),
         imageUrl: avatarUrl ?? "http://nothing.com/gag",
-        width: 35.0,
-        height: 35.0,
+        width: widgetHeight,
+        height: widgetHeight,
         fit: BoxFit.cover,
       ),
     );

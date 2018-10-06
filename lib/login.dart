@@ -1,12 +1,24 @@
+import 'dart:async';
+
 import 'package:chattao_app/constants.dart';
 import 'package:chattao_app/friends.dart';
+import 'package:chattao_app/smsLogin.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class LoginPage extends StatelessWidget {
+final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
+final GoogleSignIn googleSignIn = new GoogleSignIn();
+
+class LoginPage extends StatefulWidget {
+  @override
+  _LoginPageState createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+
   _showLoader(BuildContext context) {
     showDialog(
         context: context,
@@ -24,9 +36,7 @@ class LoginPage extends StatelessWidget {
     Navigator.of(context, rootNavigator: true).pop();
   }
 
-  _handleLogin(BuildContext context) async {
-    final GoogleSignIn googleSignIn = new GoogleSignIn();
-    final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
+  _handleGoogleLogin(BuildContext context) async {
     GoogleSignInAccount googleUser = await googleSignIn.signIn();
 
     if (googleUser == null) return;
@@ -68,9 +78,7 @@ class LoginPage extends StatelessWidget {
       await prefs.setString('photoUrl', firebaseUser.photoUrl);
       _dismissLoader(context);
       Navigator.push(context, MaterialPageRoute(builder: (context) {
-        return new FriendsPage(
-          currentUserId: firebaseUser.uid,
-        );
+        return new FriendsPage();
       }));
     } else {
       _dismissLoader(context);
@@ -80,7 +88,11 @@ class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: new AppBar(title: new Text("Login",style: TextStyle(color:Colors.white),)),
+      appBar: new AppBar(
+          title: new Text(
+        "Login",
+        style: TextStyle(color: Colors.white),
+      )),
       backgroundColor: Color(0xFFBFBFBF),
       body: Center(
         child: IntrinsicWidth(
@@ -99,7 +111,7 @@ class LoginPage extends StatelessWidget {
                   padding: EdgeInsets.all(16.0),
                   color: themeColor,
                   onPressed: () async {
-                    await _handleLogin(context);
+                    await _handleGoogleLogin(context);
                   },
                   child: Text(
                     "Sign in with Google",
@@ -120,12 +132,12 @@ class LoginPage extends StatelessWidget {
                 width: double.infinity,
                 child: FlatButton(
                   padding: EdgeInsets.all(16.0),
-                  color: themeColor,
+                  color: Colors.amber,
                   onPressed: () async {
-                    // await _showLoader(context);
+                     Navigator.push(context, MaterialPageRoute(builder: (context)=>SMSLoginPage()));
                   },
                   child: Text(
-                    "Sign in with SMS(Coming)",
+                    "Sign in with SMS",
                     style: TextStyle(color: Colors.white, fontSize: 16.0),
                   ),
                 ),

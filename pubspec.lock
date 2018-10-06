@@ -450,6 +450,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.0.8"
+  vercoder_inputer:
+    dependency: "direct main"
+    description:
+      name: vercoder_inputer
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.4.0"
   vm_service_client:
     dependency: transitive
     description:

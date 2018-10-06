@@ -1,4 +1,3 @@
-import 'package:chattao_app/friends.dart';
 import 'package:chattao_app/login.dart';
 import 'package:flutter/material.dart';
 
