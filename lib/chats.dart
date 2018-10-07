@@ -76,6 +76,8 @@ class ChatScreenState extends State<ChatScreen> {
   String imageUrl;
   bool showBottomSafeArea = true;
 
+  bool initialized = false;
+
   final TextEditingController textEditingController =
       new TextEditingController();
   final ScrollController listScrollController = new ScrollController();
@@ -235,7 +237,7 @@ class ChatScreenState extends State<ChatScreen> {
       chatmsg.syncToServer();
       chatMessages.insert(0, chatmsg);
       setState(() {
-        // chatMessages = chatMessages;
+        chatMessages = chatMessages;
       });
       listScrollController.animateTo(0.0,
           duration: Duration(milliseconds: 300), curve: Curves.easeOut);
@@ -317,8 +319,26 @@ class ChatScreenState extends State<ChatScreen> {
     }
   }
 
+  bool isTimeDiffBig(String timeStampMsgPre, String timeStampMsgNow) {
+    // Milliseconds format
+    var stamp_pre = int.parse(timeStampMsgPre);
+    var stamp_now = int.parse(timeStampMsgNow);
+
+    var timeDiff = stamp_now - stamp_pre;
+
+    return timeDiff > 1 * 1000 * 60;
+  }
+
   bool shouldShowTimeSplitter(int index) {
-    return true;
+    if ((index > 1 &&
+            chatMessages != null &&
+            isTimeDiffBig(chatMessages[index].timeStamp,
+                chatMessages[index - 1].timeStamp)) ||
+        index == 0) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   bool isLastMessageRight(int index) {
@@ -423,6 +443,7 @@ class ChatScreenState extends State<ChatScreen> {
                     textInputAction: TextInputAction.send,
                     onSubmitted: (String content) {
                       onSendMessage(content, 0);
+                      FocusScope.of(context).requestFocus(focusNode);
                     },
                   ),
                 ),
@@ -459,10 +480,14 @@ class ChatScreenState extends State<ChatScreen> {
           : Builder(
               builder: (context) {
                 if (chatMessages.length < 1) {
-                  return Center(
-                      child: CircularProgressIndicator(
-                          valueColor:
-                              AlwaysStoppedAnimation<Color>(themeColor)));
+                  return initialized
+                      ? Center(
+                          child: Text("No messages"),
+                        )
+                      : Center(
+                          child: CircularProgressIndicator(
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(themeColor)));
                 } else {
                   return GestureDetector(
                     onTap: () {

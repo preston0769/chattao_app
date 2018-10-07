@@ -68,11 +68,14 @@ class _ProfilePageState extends State<ProfilePage> {
     readLocal();
   }
 
-  _handleLogout(BuildContext context) {
+  _handleLogout(BuildContext context) async {
     final GoogleSignIn googleSignIn = new GoogleSignIn();
     final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
-    googleSignIn.signOut();
-    firebaseAuth.signOut();
+    final SharedPreferences prefs = await SharedPreferences.getInstance(); 
+
+    await googleSignIn.signOut();
+    await firebaseAuth.signOut();
+    await prefs.clear();
     Navigator.popUntil(
         context, ModalRoute.withName(Navigator.defaultRouteName));
   }
@@ -104,7 +107,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           ClipRRect(
                             borderRadius: BorderRadius.circular(8.0),
                             child: ChatAvatar(
-                              avatarUrl: myAvatar,
+                              avatarUrl: myAvatar.length>0? myAvatar:null,
                               widgetHeight: 64.0,
                             ),
                           ),
@@ -129,7 +132,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           Expanded(
                             child: Container(),
                           ),
-                          Icon(Icons.code)
+                          // Icon(Icons.code)
                         ],
                       ),
                     ),

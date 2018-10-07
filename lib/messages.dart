@@ -9,7 +9,9 @@ class ImageMessageContent extends StatelessWidget {
   final bool isMyMessage;
 
   ImageMessageContent(
-      {@required this.message, this.isLastMessageRight = false,this.isMyMessage =true});
+      {@required this.message,
+      this.isLastMessageRight = false,
+      this.isMyMessage = true});
   @override
   Widget build(BuildContext context) {
     if (message.type != 1) return Container();
@@ -18,13 +20,16 @@ class ImageMessageContent extends StatelessWidget {
         child: message.localImageFile != null
             ? Row(
                 children: <Widget>[
-                  message.syncing?Container(
-                    padding: EdgeInsets.all(5.0),
-                    height: 20.0,
-                    width: 20.0,
-                    child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(themeColor)),
-                  ):Container(),
+                  message.syncing
+                      ? Container(
+                          padding: EdgeInsets.all(5.0),
+                          height: 20.0,
+                          width: 20.0,
+                          child: CircularProgressIndicator(
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(themeColor)),
+                        )
+                      : Container(),
                   Image.file(
                     message.localImageFile,
                     width: 200.0,
@@ -125,13 +130,20 @@ class StickerMessageContent extends StatelessWidget {
 }
 
 class ChatAvatar extends StatelessWidget {
-  final String avatarUrl;
+  String avatarUrl;
   final double widgetHeight;
 
-  ChatAvatar({this.avatarUrl,this.widgetHeight = 32.0});
+  ChatAvatar({this.avatarUrl, this.widgetHeight = 32.0}) {
+    if (this.avatarUrl == null || avatarUrl.isEmpty) {
+      this.avatarUrl =
+          "https://www.templaza.com/blog/components/com_easyblog/themes/wireframe/images/placeholder-image.png";
+    }
+  }
 
   @override
-  Widget build(BuildContext context,) {
+  Widget build(
+    BuildContext context,
+  ) {
     return Container(
       height: widgetHeight,
       width: widgetHeight,
@@ -146,7 +158,7 @@ class ChatAvatar extends StatelessWidget {
           height: widgetHeight,
           padding: EdgeInsets.all(10.0),
         ),
-        imageUrl: avatarUrl ?? "http://nothing.com/gag",
+        imageUrl: avatarUrl,
         width: widgetHeight,
         height: widgetHeight,
         fit: BoxFit.cover,

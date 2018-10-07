@@ -10,7 +10,9 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
-final GoogleSignIn googleSignIn = new GoogleSignIn();
+final GoogleSignIn googleSignIn = new GoogleSignIn(
+    scopes: ['email', 'https://www.googleapis.com/auth/contacts.readonly'],
+     signInOption:  SignInOption.standard);
 
 class LoginPage extends StatefulWidget {
   @override
@@ -18,6 +20,30 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  var initialized = false;
+
+  @override
+  initState() {
+    super.initState();
+    readLocal();
+  }
+
+  readLocal() async {
+    // _showLoader(context);
+    var prefs = await SharedPreferences.getInstance();
+    var uid = prefs.getString('id');
+    if (uid != null && uid.isNotEmpty) {
+      // _dismissLoader(context);
+      Navigator.push(context, MaterialPageRoute(builder: (context) {
+        return new FriendsPage();
+      }));
+    } else {
+      // _dismissLoader(context);
+      setState(() {
+        initialized = true;
+      });
+    }
+  }
 
   _showLoader(BuildContext context) {
     showDialog(
@@ -37,6 +63,8 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   _handleGoogleLogin(BuildContext context) async {
+    googleSignIn.scopes
+        .addAll(['email', 'https://www.googleapis.com/auth/contacts.readonly']);
     GoogleSignInAccount googleUser = await googleSignIn.signIn();
 
     if (googleUser == null) return;
@@ -94,58 +122,63 @@ class _LoginPageState extends State<LoginPage> {
         style: TextStyle(color: Colors.white),
       )),
       backgroundColor: Color(0xFFBFBFBF),
-      body: Center(
-        child: IntrinsicWidth(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Container(
-                decoration: BoxDecoration(boxShadow: <BoxShadow>[
-                  BoxShadow(
-                      color: Colors.grey,
-                      blurRadius: 6.0,
-                      offset: Offset(0.0, 3.0))
-                ]),
-                width: double.infinity,
-                child: FlatButton(
-                  padding: EdgeInsets.all(16.0),
-                  color: themeColor,
-                  onPressed: () async {
-                    await _handleGoogleLogin(context);
-                  },
-                  child: Text(
-                    "Sign in with Google",
-                    style: TextStyle(color: Colors.white, fontSize: 16.0),
-                  ),
+      body: !initialized
+          ? Container()
+          : Center(
+              child: IntrinsicWidth(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Container(
+                      decoration: BoxDecoration(boxShadow: <BoxShadow>[
+                        BoxShadow(
+                            color: Colors.grey,
+                            blurRadius: 6.0,
+                            offset: Offset(0.0, 3.0))
+                      ]),
+                      width: double.infinity,
+                      child: FlatButton(
+                        padding: EdgeInsets.all(16.0),
+                        color: themeColor,
+                        onPressed: () async {
+                          await _handleGoogleLogin(context);
+                        },
+                        child: Text(
+                          "Sign in with Google",
+                          style: TextStyle(color: Colors.white, fontSize: 16.0),
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 16.0,
+                    ),
+                    Container(
+                      decoration: BoxDecoration(boxShadow: <BoxShadow>[
+                        BoxShadow(
+                            color: Colors.grey,
+                            blurRadius: 6.0,
+                            offset: Offset(0.0, 3.0))
+                      ]),
+                      width: double.infinity,
+                      child: FlatButton(
+                        padding: EdgeInsets.all(16.0),
+                        color: Colors.amber,
+                        onPressed: () async {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => SMSLoginPage()));
+                        },
+                        child: Text(
+                          "Sign in with SMS",
+                          style: TextStyle(color: Colors.white, fontSize: 16.0),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              SizedBox(
-                height: 16.0,
-              ),
-              Container(
-                decoration: BoxDecoration(boxShadow: <BoxShadow>[
-                  BoxShadow(
-                      color: Colors.grey,
-                      blurRadius: 6.0,
-                      offset: Offset(0.0, 3.0))
-                ]),
-                width: double.infinity,
-                child: FlatButton(
-                  padding: EdgeInsets.all(16.0),
-                  color: Colors.amber,
-                  onPressed: () async {
-                     Navigator.push(context, MaterialPageRoute(builder: (context)=>SMSLoginPage()));
-                  },
-                  child: Text(
-                    "Sign in with SMS",
-                    style: TextStyle(color: Colors.white, fontSize: 16.0),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+            ),
     );
   }
 }
