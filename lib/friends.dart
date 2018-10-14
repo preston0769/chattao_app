@@ -2,9 +2,11 @@ import 'dart:async';
 
 import 'package:chattao_app/chats.dart';
 import 'package:chattao_app/common.dart';
+import 'package:chattao_app/models/app_state.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_redux/flutter_redux.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class FriendsPage extends StatefulWidget {
@@ -37,7 +39,7 @@ class _FriendsPageState extends State<FriendsPage> {
     Navigator.push(
         context,
         new MaterialPageRoute(
-            builder: (context) => new Chat(
+            builder: (context) => new ChatView(
                   peerId: document.documentID,
                   peerAvatar: document['photoUrl'],
                   peerName: document['name'],
@@ -175,6 +177,15 @@ class _FriendsPageState extends State<FriendsPage> {
                                 });
                           }),
                     ),
+                    StoreConnector<AppState,String>(converter: (store){
+                       return store.state.message;
+
+                    },
+                     builder: ( context,content){
+                       return Center(child: new Text(content));
+
+                     },
+                    )
                   ],
                 ),
               ),

@@ -1,9 +1,7 @@
 import 'package:chattao_app/constants.dart';
 import 'package:chattao_app/friends.dart';
 import 'package:chattao_app/profile.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 
 class BottomBar extends StatelessWidget {
   final BuildContext context;

@@ -1,4 +1,3 @@
-import 'dart:async';
 
 import 'package:chattao_app/constants.dart';
 import 'package:chattao_app/friends.dart';

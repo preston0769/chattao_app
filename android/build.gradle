@@ -6,7 +6,20 @@ buildscript {
 
     dependencies {
         classpath 'com.android.tools.build:gradle:3.1.2'
+        classpath 'com.google.gms:google-services:4.0.1'
+        classpath 'com.google.android.gms:play-services-analytics:16.0.1'
+        classpath 'com.google.android.gms:play-services-tagmanager:16.0.1'
     }
+    subprojects {
+  project.configurations.all {
+     resolutionStrategy.eachDependency { details ->
+        if (details.requested.group == 'com.android.support'
+              && !details.requested.name.contains('multidex') ) {
+           details.useVersion "26.1.0"
+        }
+     }
+  }
+}
 }
 
 allprojects {
@@ -27,3 +40,4 @@ subprojects {
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
+com.google.gms.googleservices.GoogleServicesPlugin.config.disableVersionCheck = true

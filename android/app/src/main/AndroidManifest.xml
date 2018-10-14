@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.chattaoapp">
+    package="au.com.preston.chattao">
 
     <!-- The INTERNET permission is required for development. Specifically,
          flutter needs it to communicate with the running application
@@ -33,6 +33,8 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
+                 <action android:name="FLUTTER_NOTIFICATION_CLICK" />
+      <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
     </application>

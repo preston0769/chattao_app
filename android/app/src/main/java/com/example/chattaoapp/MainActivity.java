@@ -1,4 +1,4 @@
-package com.example.chattaoapp;
+package au.com.preston.chattao;
 
 import android.os.Bundle;
 import io.flutter.app.FlutterActivity;

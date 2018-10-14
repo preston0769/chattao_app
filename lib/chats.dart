@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:chattao_app/keys/global_keys.dart';
 import 'package:chattao_app/messages.dart';
+import 'package:chattao_app/models/chat.dart';
 import 'package:chattao_app/sticker_gallery.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -13,12 +14,13 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class Chat extends StatelessWidget {
+
+class ChatView extends StatelessWidget {
   final String peerId;
   final String peerAvatar;
   final String peerName;
 
-  Chat(
+  ChatView(
       {Key key,
       @required this.peerId,
       @required this.peerAvatar,
@@ -37,6 +39,7 @@ class Chat extends StatelessWidget {
         centerTitle: true,
       ),
       body: new ChatScreen(
+        key: chatScreenKey,
         peerId: peerId,
         peerAvatar: peerAvatar,
       ),
@@ -64,7 +67,8 @@ class ChatScreenState extends State<ChatScreen> {
   String myAvatar;
   String myId;
 
-  List<ChatMessage> chatMessages = new List();
+  List<ChatMessage> _chatMessages = new List();
+  List<ChatMessage> get chatMessages => _chatMessages;
 
   var listMessage;
   String groupChatId;
@@ -113,40 +117,55 @@ class ChatScreenState extends State<ChatScreen> {
   @override
   dispose() {
     focusNode.removeListener(onFocusChange);
+     _chatMessages.clear();
     super.dispose();
   }
 
+ void onMessageDelele(){
+   setState(() {
+      });
+ }
+
   void _updateLocalMessageList(QuerySnapshot snapShot) {
-    if (chatMessages == null || chatMessages.length == 0) {
+    if (_chatMessages == null || _chatMessages.length == 0) {
       snapShot.documents.forEach((document) {
-        chatMessages.add(new ChatMessage(
+        _chatMessages.add(new ChatMessage(
             content: document['content'],
             idFrom: document['idFrom'],
             idTo: document['idTo'],
             type: document['type'],
             localImageFile: null,
+            documentId: document.documentID,
             timeStamp: document['timestamp']));
       });
     } else {
       //Update message
       snapShot.documents.forEach((document) {
         if (document['idFrom'] == peerId) {
-          chatMessages.firstWhere(
-              (message) => message.timeStamp == document['timestamp'],
+          _chatMessages.firstWhere(
+              (message) => message.documentId == document.documentID,
               orElse: () {
-            chatMessages.add(new ChatMessage(
+            _chatMessages.add(new ChatMessage(
                 content: document['content'],
                 idFrom: document['idFrom'],
                 idTo: document['idTo'],
                 type: document['type'],
                 localImageFile: null,
+                documentId:  document.documentID,
                 timeStamp: document['timestamp']));
           });
+        } else{
+         var chatMsg =  _chatMessages.firstWhere(
+              (message) => message.timeStamp== document['timestamp'],
+              orElse: () {
+
+              });
+              chatMsg.documentId = document.documentID;
         }
       });
     }
 
-    chatMessages.sort((a, b) => b.timeStamp.compareTo(a.timeStamp));
+    _chatMessages.sort((a, b) => b.timeStamp.compareTo(a.timeStamp));
     setState(() {
       // chatMessages = chatMessages;
     });
@@ -191,9 +210,9 @@ class ChatScreenState extends State<ChatScreen> {
           timeStamp: DateTime.now().millisecondsSinceEpoch.toString(),
           type: 1);
       chatMsg.syncToServer();
-      chatMessages.insert(0, chatMsg);
+      _chatMessages.insert(0, chatMsg);
       setState(() {
-        chatMessages = chatMessages;
+        _chatMessages = _chatMessages;
       });
     }
   }
@@ -235,9 +254,9 @@ class ChatScreenState extends State<ChatScreen> {
           timeStamp: DateTime.now().millisecondsSinceEpoch.toString());
 
       chatmsg.syncToServer();
-      chatMessages.insert(0, chatmsg);
+      _chatMessages.insert(0, chatmsg);
       setState(() {
-        chatMessages = chatMessages;
+        // _chatMessages = _chatMessages;
       });
       listScrollController.animateTo(0.0,
           duration: Duration(milliseconds: 300), curve: Curves.easeOut);
@@ -321,19 +340,19 @@ class ChatScreenState extends State<ChatScreen> {
 
   bool isTimeDiffBig(String timeStampMsgPre, String timeStampMsgNow) {
     // Milliseconds format
-    var stamp_pre = int.parse(timeStampMsgPre);
-    var stamp_now = int.parse(timeStampMsgNow);
+    var stampPre = int.parse(timeStampMsgPre);
+    var stampNow = int.parse(timeStampMsgNow);
 
-    var timeDiff = stamp_now - stamp_pre;
+    var timeDiff = stampNow - stampPre;
 
     return timeDiff > 1 * 1000 * 60;
   }
 
   bool shouldShowTimeSplitter(int index) {
     if ((index > 1 &&
-            chatMessages != null &&
-            isTimeDiffBig(chatMessages[index].timeStamp,
-                chatMessages[index - 1].timeStamp)) ||
+            _chatMessages != null &&
+            isTimeDiffBig(_chatMessages[index].timeStamp,
+                _chatMessages[index - 1].timeStamp)) ||
         index == 0) {
       return true;
     } else {
@@ -343,8 +362,8 @@ class ChatScreenState extends State<ChatScreen> {
 
   bool isLastMessageRight(int index) {
     if ((index > 0 &&
-            chatMessages != null &&
-            chatMessages[index - 1].idFrom != myId) ||
+            _chatMessages != null &&
+            _chatMessages[index - 1].idFrom != myId) ||
         index == 0) {
       return true;
     } else {
@@ -479,7 +498,7 @@ class ChatScreenState extends State<ChatScreen> {
                   valueColor: AlwaysStoppedAnimation<Color>(themeColor)))
           : Builder(
               builder: (context) {
-                if (chatMessages.length < 1) {
+                if (_chatMessages.length < 1) {
                   return initialized
                       ? Center(
                           child: Text("No messages"),
@@ -500,8 +519,8 @@ class ChatScreenState extends State<ChatScreen> {
                     child: ListView.builder(
                       padding: EdgeInsets.all(10.0),
                       itemBuilder: (context, index) =>
-                          buildItem(index, chatMessages[index]),
-                      itemCount: chatMessages.length,
+                          buildItem(index, _chatMessages[index]),
+                      itemCount: _chatMessages.length,
                       reverse: true,
                       controller: listScrollController,
                     ),
@@ -510,76 +529,5 @@ class ChatScreenState extends State<ChatScreen> {
               },
             ),
     );
-  }
-}
-
-class ChatMessage {
-  final int type;
-  String content;
-  final String idFrom;
-  final String idTo;
-  final String timeStamp;
-
-  final File localImageFile;
-
-  bool synced = false;
-  bool syncing = false;
-  bool syncFailed = false;
-  String chatId = "";
-
-  ChatMessage(
-      {@required this.type,
-      @required this.content,
-      @required this.idFrom,
-      @required this.idTo,
-      @required this.timeStamp,
-      this.localImageFile}) {
-    if (idFrom.hashCode <= idTo.hashCode) {
-      chatId = '$idFrom-$idTo';
-    } else {
-      chatId = '$idTo-$idFrom';
-    }
-  }
-  Future<String> _uploadFile() async {
-    String fileName = DateTime.now().millisecondsSinceEpoch.toString();
-    StorageReference reference = FirebaseStorage.instance.ref().child(fileName);
-    StorageUploadTask uploadTask = reference.putFile(localImageFile);
-
-    Uri downloadUrl = (await uploadTask.future).downloadUrl;
-    var imageUrl = downloadUrl.toString();
-
-    return imageUrl;
-  }
-
-  void syncToServer() async {
-    try {
-      syncing = true;
-      if (type == 1 && localImageFile != null) content = await _uploadFile();
-      var documentReference = Firestore.instance
-          .collection('messages')
-          .document(chatId)
-          .collection(chatId)
-          .document(DateTime.now().millisecondsSinceEpoch.toString());
-
-      Firestore.instance.runTransaction((transaction) async {
-        await transaction.set(
-          documentReference,
-          {
-            'idFrom': idFrom,
-            'idTo': idTo,
-            'timestamp': DateTime.now().millisecondsSinceEpoch.toString(),
-            'content': content,
-            'type': type
-          },
-        );
-        syncing = false;
-        synced = true;
-      });
-    } catch (error) {
-      syncing = false;
-      syncFailed = true;
-      return;
-    }
-    synced = true;
   }
 }
