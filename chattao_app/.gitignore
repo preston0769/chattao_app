@@ -1,0 +1,12 @@
+.DS_Store
+.dart_tool/
+
+.packages
+.pub/
+
+build/
+
+.flutter-plugins
+ios/Runner/GoogleService-Info.plist
+ios/Runner/Info.plist
+android/app/google-services.json
