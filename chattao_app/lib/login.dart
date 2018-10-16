@@ -1,10 +1,14 @@
 
+import 'dart:async';
 import 'package:chattao_app/constants.dart';
 import 'package:chattao_app/friends.dart';
+import 'package:chattao_app/keys/global_keys.dart';
+import 'package:chattao_app/models/app_state.dart';
 import 'package:chattao_app/smsLogin.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_redux/flutter_redux.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -82,24 +86,11 @@ class _LoginPageState extends State<LoginPage> {
     if (firebaseUser != null) {
       var prefs = await SharedPreferences.getInstance();
 
-      // Check is already sign up
-      final QuerySnapshot result = await Firestore.instance
-          .collection('users')
-          .where('id', isEqualTo: firebaseUser.uid)
-          .getDocuments();
-      final List<DocumentSnapshot> documents = result.documents;
-      if (documents.length == 0) {
-        // Update data to server if new user
-        Firestore.instance
-            .collection('users')
-            .document(firebaseUser.uid)
-            .setData({
-          'isOnline': true,
-          'name': firebaseUser.displayName,
-          'photoUrl': firebaseUser.photoUrl,
-          'id': firebaseUser.uid
-        });
-      }
+      await _addUserToDBIfNotExists(firebaseUser);
+
+      await _addDeviceTokenIfNotExists(firebaseUser, context);
+
+
       await prefs.setString('id', firebaseUser.uid);
       await prefs.setString('name', firebaseUser.displayName);
       await prefs.setString('photoUrl', firebaseUser.photoUrl);
@@ -109,6 +100,53 @@ class _LoginPageState extends State<LoginPage> {
       }));
     } else {
       _dismissLoader(context);
+    }
+  }
+
+  Future _addDeviceTokenIfNotExists(FirebaseUser firebaseUser,BuildContext context) async{
+
+    var reduxStore = StoreProvider.of<AppState>(context);
+    var token = reduxStore.state.pushNotificationToken;
+
+    final QuerySnapshot result = await Firestore.instance
+        .collection('devicetokens')
+        .where('userId', isEqualTo: firebaseUser.uid)
+        .getDocuments();
+    final List<DocumentSnapshot> documents = result.documents;
+    if (documents.length == 0) {
+      // Update data to server if new user
+      Firestore.instance
+          .collection('devicetokens')
+          .document(firebaseUser.uid)
+          .setData({
+        'token': token,
+        'createdTime': DateTime.now().millisecondsSinceEpoch.toString(),
+        'deleted': false,
+        'uid': firebaseUser.uid
+      });
+    }
+    
+
+
+  }
+
+  Future _addUserToDBIfNotExists(FirebaseUser firebaseUser) async {
+    final QuerySnapshot result = await Firestore.instance
+        .collection('users')
+        .where('id', isEqualTo: firebaseUser.uid)
+        .getDocuments();
+    final List<DocumentSnapshot> documents = result.documents;
+    if (documents.length == 0) {
+      // Update data to server if new user
+      Firestore.instance
+          .collection('users')
+          .document(firebaseUser.uid)
+          .setData({
+        'isOnline': true,
+        'name': firebaseUser.displayName,
+        'photoUrl': firebaseUser.photoUrl,
+        'id': firebaseUser.uid
+      });
     }
   }
 

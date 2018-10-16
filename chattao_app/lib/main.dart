@@ -13,7 +13,7 @@ import 'package:chattao_app/reducers/app_reducers.dart';
 void main() => runApp(new MyApp());
 
 class MyApp extends StatelessWidget {
-  final store =new Store<AppState>(appReducer, initialState:AppState.initial());
+final store =new Store<AppState>(appReducer, initialState:AppState.initial());
   MyApp():super(key:mainAppKey);
 
   @override

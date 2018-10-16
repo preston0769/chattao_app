@@ -177,15 +177,15 @@ class _FriendsPageState extends State<FriendsPage> {
                                 });
                           }),
                     ),
-                    StoreConnector<AppState,String>(converter: (store){
-                       return store.state.pushNotificationToken;
+                    // StoreConnector<AppState,String>(converter: (store){
+                    //    return store.state.pushNotificationToken;
 
-                    },
-                     builder: ( context,content){
-                       return Center(child: new Text(content));
+                    // },
+                    //  builder: ( context,content){
+                    //    return Center(child: new Text(content));
 
-                     },
-                    )
+                    //  },
+                    // )
                   ],
                 ),
               ),
