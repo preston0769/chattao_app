@@ -1,11 +1,17 @@
 import 'dart:async';
 
+import 'package:chattao_app/actions/app_actions.dart';
 import 'package:chattao_app/chat_list.dart';
 import 'package:chattao_app/constants.dart';
-import 'package:chattao_app/friends.dart';
+import 'package:chattao_app/keys/global_keys.dart';
+import 'package:chattao_app/main.dart';
+import 'package:chattao_app/models/app_state.dart';
+import 'package:chattao_app/models/chat.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_redux/flutter_redux.dart';
+import 'package:redux/redux.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
@@ -87,9 +93,54 @@ class _SMSLoginPageState extends State<SMSLoginPage> {
           'id': firebaseUser.uid
         });
       }
+
+      User me = new User(firebaseUser.uid);
+      me.avataURL = firebaseUser.photoUrl;
+      me.name = firebaseUser.displayName;
+      me.nickName = firebaseUser.displayName;
+
+      var reduxStore = StoreProvider.of<AppState>(context);
+      reduxStore.dispatch(UserLogined(me));
+
       await prefs.setString('id', firebaseUser.uid);
       await prefs.setString('name', name);
       await prefs.setString('photoUrl', photoURL);
+
+      await AddDeviceTokenIfNotExists(firebaseUser, context);
+    }
+  }
+
+  Future AddDeviceTokenIfNotExists(
+      FirebaseUser firebaseUser, BuildContext context) async {
+
+    Store<AppState> reduxStore = (mainAppKey.currentWidget as MyApp).store;
+    var token = reduxStore.state.pushNotificationToken;
+
+    final QuerySnapshot result = await Firestore.instance
+        .collection('devicetokens')
+        .where('userId', isEqualTo: firebaseUser.uid)
+        .getDocuments();
+    final List<DocumentSnapshot> documents = result.documents;
+    if (documents.length == 0) {
+      // Update data to server if new user
+      Firestore.instance
+          .collection('devicetokens')
+          .document(firebaseUser.uid)
+          .setData({
+        'token': token,
+        'createdTime': DateTime.now().millisecondsSinceEpoch.toString(),
+        'deleted': false,
+        'uid': firebaseUser.uid
+      });
+    }
+    else{
+      Firestore.instance
+          .collection('devicetokens')
+          .document(firebaseUser.uid)
+          .updateData({
+        'token': token,
+      });
+
     }
   }
 

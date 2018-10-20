@@ -4,7 +4,7 @@ import 'package:chattao_app/models/app_state.dart';
 AppState appReducer(AppState state, action){
 
   if(action is NewChatMsgReceivedAction){
-    state.message = action.content;
+    state.message = action.msg.content;
     return state;
   }
 
@@ -45,6 +45,15 @@ AppState appReducer(AppState state, action){
    if(action is UpdateChatList){
      state.chats.clear();
      state.chats.addAll(action.chats);
+     return state;
+   }
+
+   if(action is SetJumpToPeerAction){
+     state.targetPeerId = action.jumpToPeerId;
+     return state;
+   }
+   if(action is  ClearJumpToPeerAction){
+     state.targetPeerId =  "";
      return state;
    }
 

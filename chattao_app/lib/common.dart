@@ -1,3 +1,4 @@
+
 import 'package:chattao_app/chat_list.dart';
 import 'package:chattao_app/constants.dart';
 import 'package:chattao_app/friends.dart';
@@ -27,11 +28,14 @@ class BottomBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: themeColor,
+      color: Color(0xFFDCDCDC),
       child: SafeArea(
         child: Container(
-            padding: EdgeInsets.only(top: 8.0),
-            constraints: BoxConstraints(maxHeight: 50.0),
+            padding: EdgeInsets.only(top: 8.0,bottom: 8.0),
+            constraints: BoxConstraints(maxHeight: 58.0),
+             decoration: BoxDecoration(
+                border: Border( top: BorderSide( width: 0.3, style: BorderStyle.solid, color: Colors.grey))
+             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
@@ -45,11 +49,6 @@ class BottomBar extends StatelessWidget {
                     title: "Contacts",
                     isFocused: activeIndex == 1,
                     onTap: _navToContacts),
-                NavBarItem(
-                  iconData: Icons.notification_important,
-                  title: "Requests",
-                  onTap: () {},
-                ),
                 NavBarItem(
                     iconData: Icons.location_searching, title: "Discover"),
                 NavBarItem(
@@ -87,13 +86,12 @@ class NavBarItem extends StatelessWidget {
           children: <Widget>[
             Icon(
               iconData,
-              color: isFocused ? Colors.orangeAccent : Colors.white,
+              color: isFocused ? themeColor : Colors.white.withAlpha(160),
             ),
-            Text(
-              title,
-              style: TextStyle(
-                  color: isFocused ? Colors.orangeAccent : Colors.white),
-            ),
+            Text(title,
+                style: TextStyle(
+                  color: isFocused ? themeColor : Colors.black.withAlpha(160),
+                )),
           ],
         ),
       ),

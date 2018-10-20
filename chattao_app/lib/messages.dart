@@ -1,6 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chattao_app/constants.dart';
-import 'package:chattao_app/models/chat.dart';
 import 'package:chattao_app/models/chat_message.dart';
 import 'package:flutter/material.dart';
 

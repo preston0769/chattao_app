@@ -148,7 +148,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       child: Container(
                         margin: EdgeInsets.only(bottom: 32.0),
                         padding: EdgeInsets.all(16.0),
-                        color: Color(0xFF666666),
+                        color: themeColor,
                         child: Center(
                           child: Text(
                             "Log out",

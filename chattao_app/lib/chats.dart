@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:chattao_app/keys/global_keys.dart';
 import 'package:chattao_app/messages.dart';
-import 'package:chattao_app/models/chat.dart';
 import 'package:chattao_app/models/chat_message.dart';
 import 'package:chattao_app/sticker_gallery.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -14,7 +13,6 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 
 class ChatView extends StatelessWidget {
   final String peerId;
@@ -118,14 +116,13 @@ class ChatScreenState extends State<ChatScreen> {
   @override
   dispose() {
     focusNode.removeListener(onFocusChange);
-     _chatMessages.clear();
+    _chatMessages.clear();
     super.dispose();
   }
 
- void onMessageDelele(){
-   setState(() {
-      });
- }
+  void onMessageDelele() {
+    setState(() {});
+  }
 
   void _updateLocalMessageList(QuerySnapshot snapShot) {
     if (_chatMessages == null || _chatMessages.length == 0) {
@@ -152,24 +149,24 @@ class ChatScreenState extends State<ChatScreen> {
                 idTo: document['idTo'],
                 type: document['type'],
                 localImageFile: null,
-                documentId:  document.documentID,
+                documentId: document.documentID,
                 timeStamp: document['timestamp']));
           });
-        } else{
-         var chatMsg =  _chatMessages.firstWhere(
-              (message) => message.timeStamp== document['timestamp'],
-              orElse: () {
-
-              });
-              chatMsg.documentId = document.documentID;
+        } else {
+          var chatMsg = _chatMessages.firstWhere(
+              (message) => message.timeStamp == document['timestamp'],
+              orElse: () {});
+          chatMsg.documentId = document.documentID;
         }
       });
     }
 
     _chatMessages.sort((a, b) => b.timeStamp.compareTo(a.timeStamp));
-    setState(() {
-      _chatMessages = chatMessages;
-    });
+    if (mounted) {
+      setState(() {
+        _chatMessages = chatMessages;
+      });
+    }
   }
 
   void onFocusChange() {

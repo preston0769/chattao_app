@@ -4,7 +4,6 @@ import 'package:chattao_app/chats.dart';
 import 'package:chattao_app/common.dart';
 import 'package:chattao_app/models/app_state.dart';
 import 'package:chattao_app/models/chat.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_redux/flutter_redux.dart';

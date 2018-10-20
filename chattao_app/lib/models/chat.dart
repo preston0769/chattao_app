@@ -1,12 +1,5 @@
-import 'dart:async';
-import 'dart:io';
 
-import 'package:chattao_app/chats.dart';
-import 'package:chattao_app/keys/global_keys.dart';
 import 'package:chattao_app/models/chat_message.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/material.dart';
 
 class Chat{
   final User me;

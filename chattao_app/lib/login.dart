@@ -1,10 +1,7 @@
-
 import 'dart:async';
 import 'package:chattao_app/actions/app_actions.dart';
 import 'package:chattao_app/chat_list.dart';
 import 'package:chattao_app/constants.dart';
-import 'package:chattao_app/friends.dart';
-import 'package:chattao_app/keys/global_keys.dart';
 import 'package:chattao_app/models/app_state.dart';
 import 'package:chattao_app/models/chat.dart';
 import 'package:chattao_app/smsLogin.dart';
@@ -18,7 +15,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
 final GoogleSignIn googleSignIn = new GoogleSignIn(
     scopes: ['email', 'https://www.googleapis.com/auth/contacts.readonly'],
-     signInOption:  SignInOption.standard);
+    signInOption: SignInOption.standard);
 
 class LoginPage extends StatefulWidget {
   @override
@@ -39,17 +36,20 @@ class _LoginPageState extends State<LoginPage> {
     var prefs = await SharedPreferences.getInstance();
     var uid = prefs.getString('id');
     if (uid != null && uid.isNotEmpty) {
-      User me = new User( prefs.getString('id'));
-      me.avataURL= prefs.getString('photoUrl');
+      User me = new User(prefs.getString('id'));
+      me.avataURL = prefs.getString('photoUrl');
       me.name = prefs.getString('name');
-      me.nickName= prefs.getString('name');
+      me.nickName = prefs.getString('name');
 
       var reduxStore = StoreProvider.of<AppState>(context);
       reduxStore.dispatch(UserLogined(me));
       // _dismissLoader(context);
-      Navigator.push(context, MaterialPageRoute(builder: (context) {
-        return new ChatListPage();
-      }));
+      if (reduxStore.state.targetPeerId == null ||
+          reduxStore.state.targetPeerId.isEmpty) {
+        Navigator.push(context, MaterialPageRoute(builder: (context) {
+          return new ChatListPage();
+        }));
+      }
     } else {
       // _dismissLoader(context);
       setState(() {
@@ -75,6 +75,37 @@ class _LoginPageState extends State<LoginPage> {
     Navigator.of(context, rootNavigator: true).pop();
   }
 
+  Future AddDeviceTokenIfNotExists(
+      FirebaseUser firebaseUser, BuildContext context) async {
+    var reduxStore = StoreProvider.of<AppState>(context);
+    var token = reduxStore.state.pushNotificationToken;
+
+    final QuerySnapshot result = await Firestore.instance
+        .collection('devicetokens')
+        .where('userId', isEqualTo: firebaseUser.uid)
+        .getDocuments();
+    final List<DocumentSnapshot> documents = result.documents;
+    if (documents.length == 0) {
+      // Update data to server if new user
+      Firestore.instance
+          .collection('devicetokens')
+          .document(firebaseUser.uid)
+          .setData({
+        'token': token,
+        'createdTime': DateTime.now().millisecondsSinceEpoch.toString(),
+        'deleted': false,
+        'uid': firebaseUser.uid
+      });
+    } else {
+      Firestore.instance
+          .collection('devicetokens')
+          .document(firebaseUser.uid)
+          .updateData({
+        'token': token,
+      });
+    }
+  }
+
   _handleGoogleLogin(BuildContext context) async {
     googleSignIn.scopes
         .addAll(['email', 'https://www.googleapis.com/auth/contacts.readonly']);
@@ -98,16 +129,15 @@ class _LoginPageState extends State<LoginPage> {
 
       await _addUserToDBIfNotExists(firebaseUser);
 
-      await _addDeviceTokenIfNotExists(firebaseUser, context);
+      await AddDeviceTokenIfNotExists(firebaseUser, context);
 
-      User me = new User( firebaseUser.uid);
-      me.avataURL= firebaseUser.photoUrl;
+      User me = new User(firebaseUser.uid);
+      me.avataURL = firebaseUser.photoUrl;
       me.name = firebaseUser.displayName;
       me.nickName = firebaseUser.displayName;
 
       var reduxStore = StoreProvider.of<AppState>(context);
       reduxStore.dispatch(UserLogined(me));
-
 
       await prefs.setString('id', firebaseUser.uid);
       await prefs.setString('name', firebaseUser.displayName);
@@ -119,33 +149,6 @@ class _LoginPageState extends State<LoginPage> {
     } else {
       _dismissLoader(context);
     }
-  }
-
-  Future _addDeviceTokenIfNotExists(FirebaseUser firebaseUser,BuildContext context) async{
-
-    var reduxStore = StoreProvider.of<AppState>(context);
-    var token = reduxStore.state.pushNotificationToken;
-
-    final QuerySnapshot result = await Firestore.instance
-        .collection('devicetokens')
-        .where('userId', isEqualTo: firebaseUser.uid)
-        .getDocuments();
-    final List<DocumentSnapshot> documents = result.documents;
-    if (documents.length == 0) {
-      // Update data to server if new user
-      Firestore.instance
-          .collection('devicetokens')
-          .document(firebaseUser.uid)
-          .setData({
-        'token': token,
-        'createdTime': DateTime.now().millisecondsSinceEpoch.toString(),
-        'deleted': false,
-        'uid': firebaseUser.uid
-      });
-    }
-    
-
-
   }
 
   Future _addUserToDBIfNotExists(FirebaseUser firebaseUser) async {

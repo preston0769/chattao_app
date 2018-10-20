@@ -1,10 +1,9 @@
 import 'package:chattao_app/models/chat.dart';
+import 'package:chattao_app/models/chat_message.dart';
 
 class NewChatMsgReceivedAction {
-  final int idFrom;
-  final int idTo;
-  final String content;
-  NewChatMsgReceivedAction(this.idFrom, this.idTo, this.content);
+  ChatMessage msg;
+  NewChatMsgReceivedAction(this.msg);
 }
 
 class UpdatePushNotificationTokenAction {
@@ -41,5 +40,13 @@ class UpdateFriends{
 class UpdateChatList{
   final List<Chat> chats;
   UpdateChatList(this.chats);
+}
+
+class SetJumpToPeerAction{
+  String jumpToPeerId;
+  SetJumpToPeerAction(this.jumpToPeerId);
+}
+
+class ClearJumpToPeerAction{
 }
 
