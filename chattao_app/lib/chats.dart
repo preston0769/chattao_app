@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:chattao_app/keys/global_keys.dart';
 import 'package:chattao_app/messages.dart';
 import 'package:chattao_app/models/chat.dart';
+import 'package:chattao_app/models/chat_message.dart';
 import 'package:chattao_app/sticker_gallery.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -167,7 +168,7 @@ class ChatScreenState extends State<ChatScreen> {
 
     _chatMessages.sort((a, b) => b.timeStamp.compareTo(a.timeStamp));
     setState(() {
-      // chatMessages = chatMessages;
+      _chatMessages = chatMessages;
     });
   }
 

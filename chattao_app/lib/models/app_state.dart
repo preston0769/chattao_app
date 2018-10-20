@@ -5,21 +5,21 @@ import 'package:meta/meta.dart';
 @immutable
 class AppState{
   final List<Chat> chats;
-  final ListState listState;
-  final String message;
+  final List<User> friends;
+  final bool logined;
+  bool listenerRegistered = false;
+  User me;
+  InitState initState =  InitState.Initing;
+  String message = "Initing";
   String pushNotificationToken;
 
-  AppState(this.chats,this.listState,this.message);
+  AppState(this.chats, this.friends, this.logined);
 
-  factory AppState.initial()=>AppState(List.unmodifiable([]),ListState.listOnly,'Inited');
-
-  updateToken(String pushNotificationToken){
-    this.pushNotificationToken = pushNotificationToken;
-  }
+  factory AppState.initial()=>AppState(List(), List(),false);
 
 }
 
 
-enum ListState{
-  listOnly,listWithNewItem
+enum InitState{
+  Initing, Inited,Error
 }

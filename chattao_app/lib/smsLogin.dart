@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:chattao_app/chat_list.dart';
 import 'package:chattao_app/constants.dart';
 import 'package:chattao_app/friends.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -145,7 +146,7 @@ class _SMSLoginPageState extends State<SMSLoginPage> {
 
     _dismissLoader(context);
     Navigator.push(context, MaterialPageRoute(builder: (context) {
-      return new FriendsPage();
+      return new ChatListPage();
     }));
   }
 

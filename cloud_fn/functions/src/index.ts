@@ -22,7 +22,7 @@ export const triggerMessage = functions.firestore
       .collection("devicetokens").doc(message.idTo).get();
     var userRefPromise = admin
       .firestore()
-      .collection("users").doc(message.idTo).get();
+      .collection("users").doc(message.idFrom).get();
 
     return Promise.all([tokenRefPromise, userRefPromise])
       .then(results => {
@@ -35,11 +35,16 @@ export const triggerMessage = functions.firestore
         var targetToken = tokenRef.data().token;
         var user = userRef.data();
 
+        const content = message.type === 1?"[Image]":message.type===2?"[Sticker]":(message.content as String).substring(0,27);
         const payload = {
           notification: {
             title: user.name,
-            body: message.content
+            body:content,
           },
+          data:{
+            idFrom: message.idFrom,
+            click_action:"FLUTTER_NOTIFICATION_CLICK",
+          }
         };
         admin
           .messaging()

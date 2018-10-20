@@ -1,36 +1,36 @@
 PODS:
-  - BoringSSL (10.0.5):
-    - BoringSSL/Implementation (= 10.0.5)
-    - BoringSSL/Interface (= 10.0.5)
-  - BoringSSL/Implementation (10.0.5):
-    - BoringSSL/Interface (= 10.0.5)
-  - BoringSSL/Interface (10.0.5)
+  - BoringSSL (10.0.6):
+    - BoringSSL/Implementation (= 10.0.6)
+    - BoringSSL/Interface (= 10.0.6)
+  - BoringSSL/Implementation (10.0.6):
+    - BoringSSL/Interface (= 10.0.6)
+  - BoringSSL/Interface (10.0.6)
   - cloud_firestore (0.0.1):
     - Firebase/Auth
     - Firebase/Core
     - Firebase/Database
     - Firebase/Firestore
     - Flutter
-  - Firebase/Auth (5.4.1):
+  - Firebase/Auth (5.10.0):
     - Firebase/CoreOnly
-    - FirebaseAuth (= 5.0.2)
-  - Firebase/Core (5.4.1):
+    - FirebaseAuth (= 5.0.4)
+  - Firebase/Core (5.10.0):
     - Firebase/CoreOnly
-    - FirebaseAnalytics (= 5.0.1)
-  - Firebase/CoreOnly (5.4.1):
-    - FirebaseCore (= 5.0.6)
-  - Firebase/Database (5.4.1):
+    - FirebaseAnalytics (= 5.2.0)
+  - Firebase/CoreOnly (5.10.0):
+    - FirebaseCore (= 5.1.5)
+  - Firebase/Database (5.10.0):
     - Firebase/CoreOnly
-    - FirebaseDatabase (= 5.0.2)
-  - Firebase/Firestore (5.4.1):
+    - FirebaseDatabase (= 5.0.3)
+  - Firebase/Firestore (5.10.0):
     - Firebase/CoreOnly
-    - FirebaseFirestore (= 0.12.6)
-  - Firebase/Messaging (5.4.1):
+    - FirebaseFirestore (= 0.13.5)
+  - Firebase/Messaging (5.10.0):
     - Firebase/CoreOnly
-    - FirebaseMessaging (= 3.0.3)
-  - Firebase/Storage (5.4.1):
+    - FirebaseMessaging (= 3.2.0)
+  - Firebase/Storage (5.10.0):
     - Firebase/CoreOnly
-    - FirebaseStorage (= 3.0.0)
+    - FirebaseStorage (= 3.0.2)
   - firebase_auth (0.0.1):
     - Firebase/Auth
     - Firebase/Core
@@ -45,40 +45,55 @@ PODS:
   - firebase_storage (0.0.1):
     - Firebase/Storage
     - Flutter
-  - FirebaseAnalytics (5.0.1):
-    - FirebaseCore (~> 5.0)
-    - FirebaseInstanceID (~> 3.0)
-    - "GoogleToolboxForMac/NSData+zlib (~> 2.1)"
+  - FirebaseAnalytics (5.2.0):
+    - FirebaseCore (~> 5.1)
+    - FirebaseInstanceID (~> 3.2)
+    - GoogleAppMeasurement (~> 5.2)
+    - GoogleUtilities/AppDelegateSwizzler (~> 5.2)
+    - GoogleUtilities/MethodSwizzler (~> 5.2)
+    - GoogleUtilities/Network (~> 5.2)
+    - "GoogleUtilities/NSData+zlib (~> 5.2)"
     - nanopb (~> 0.3)
-  - FirebaseAuth (5.0.2):
+  - FirebaseAuth (5.0.4):
+    - FirebaseAuthInterop (~> 1.0)
     - FirebaseCore (~> 5.0)
+    - GoogleUtilities/Environment (~> 5.2)
     - GTMSessionFetcher/Core (~> 1.1)
-  - FirebaseCore (5.0.6):
-    - "GoogleToolboxForMac/NSData+zlib (~> 2.1)"
-  - FirebaseDatabase (5.0.2):
+  - FirebaseAuthInterop (1.0.0)
+  - FirebaseCore (5.1.5):
+    - GoogleUtilities/Logger (~> 5.2)
+  - FirebaseDatabase (5.0.3):
     - FirebaseCore (~> 5.0)
     - leveldb-library (~> 1.18)
-  - FirebaseFirestore (0.12.6):
-    - FirebaseCore (~> 5.0)
-    - FirebaseFirestore/abseil-cpp (= 0.12.6)
+  - FirebaseFirestore (0.13.5):
+    - FirebaseAuthInterop (~> 1.0)
+    - FirebaseCore (~> 5.1)
+    - FirebaseFirestore/abseil-cpp (= 0.13.5)
+    - "gRPC-C++ (~> 0.0.3)"
     - gRPC-ProtoRPC (~> 1.0)
-    - leveldb-library (~> 1.18)
+    - leveldb-library (~> 1.20)
     - nanopb (~> 0.3.8)
     - Protobuf (~> 3.1)
-  - FirebaseFirestore/abseil-cpp (0.12.6):
-    - FirebaseCore (~> 5.0)
+  - FirebaseFirestore/abseil-cpp (0.13.5):
+    - FirebaseAuthInterop (~> 1.0)
+    - FirebaseCore (~> 5.1)
+    - "gRPC-C++ (~> 0.0.3)"
     - gRPC-ProtoRPC (~> 1.0)
-    - leveldb-library (~> 1.18)
+    - leveldb-library (~> 1.20)
     - nanopb (~> 0.3.8)
     - Protobuf (~> 3.1)
-  - FirebaseInstanceID (3.1.1):
-    - FirebaseCore (~> 5.0)
-  - FirebaseMessaging (3.0.3):
+  - FirebaseInstanceID (3.2.2):
+    - FirebaseCore (~> 5.1)
+    - GoogleUtilities/Environment (~> 5.3)
+    - GoogleUtilities/UserDefaults (~> 5.3)
+  - FirebaseMessaging (3.2.0):
     - FirebaseCore (~> 5.0)
     - FirebaseInstanceID (~> 3.0)
-    - GoogleToolboxForMac/Logger (~> 2.1)
+    - GoogleUtilities/Environment (~> 5.2)
+    - GoogleUtilities/Reachability (~> 5.2)
     - Protobuf (~> 3.1)
-  - FirebaseStorage (3.0.0):
+  - FirebaseStorage (3.0.2):
+    - FirebaseAuthInterop (~> 1.0)
     - FirebaseCore (~> 5.0)
     - GTMSessionFetcher/Core (~> 1.1)
   - Flutter (1.0.0)
@@ -87,6 +102,12 @@ PODS:
   - google_sign_in (0.0.1):
     - Flutter
     - GoogleSignIn (~> 4.0)
+  - GoogleAppMeasurement (5.2.0):
+    - GoogleUtilities/AppDelegateSwizzler (~> 5.2)
+    - GoogleUtilities/MethodSwizzler (~> 5.2)
+    - GoogleUtilities/Network (~> 5.2)
+    - "GoogleUtilities/NSData+zlib (~> 5.2)"
+    - nanopb (~> 0.3)
   - GoogleSignIn (4.1.2):
     - "GoogleToolboxForMac/NSDictionary+URLArguments (~> 2.1)"
     - "GoogleToolboxForMac/NSString+URLArguments (~> 2.1)"
@@ -95,36 +116,58 @@ PODS:
   - GoogleToolboxForMac/DebugUtils (2.1.4):
     - GoogleToolboxForMac/Defines (= 2.1.4)
   - GoogleToolboxForMac/Defines (2.1.4)
-  - GoogleToolboxForMac/Logger (2.1.4):
-    - GoogleToolboxForMac/Defines (= 2.1.4)
-  - "GoogleToolboxForMac/NSData+zlib (2.1.4)":
-    - GoogleToolboxForMac/Defines (= 2.1.4)
   - "GoogleToolboxForMac/NSDictionary+URLArguments (2.1.4)":
     - GoogleToolboxForMac/DebugUtils (= 2.1.4)
     - GoogleToolboxForMac/Defines (= 2.1.4)
     - "GoogleToolboxForMac/NSString+URLArguments (= 2.1.4)"
   - "GoogleToolboxForMac/NSString+URLArguments (2.1.4)"
-  - gRPC (1.13.0):
-    - gRPC-RxLibrary (= 1.13.0)
-    - gRPC/Main (= 1.13.0)
-  - gRPC-Core (1.13.0):
-    - gRPC-Core/Implementation (= 1.13.0)
-    - gRPC-Core/Interface (= 1.13.0)
-  - gRPC-Core/Implementation (1.13.0):
-    - BoringSSL (~> 10.0)
-    - gRPC-Core/Interface (= 1.13.0)
+  - GoogleUtilities/AppDelegateSwizzler (5.3.3):
+    - GoogleUtilities/Environment
+    - GoogleUtilities/Logger
+    - GoogleUtilities/Network
+  - GoogleUtilities/Environment (5.3.3)
+  - GoogleUtilities/Logger (5.3.3):
+    - GoogleUtilities/Environment
+  - GoogleUtilities/MethodSwizzler (5.3.3):
+    - GoogleUtilities/Logger
+  - GoogleUtilities/Network (5.3.3):
+    - GoogleUtilities/Logger
+    - "GoogleUtilities/NSData+zlib"
+    - GoogleUtilities/Reachability
+  - "GoogleUtilities/NSData+zlib (5.3.3)"
+  - GoogleUtilities/Reachability (5.3.3):
+    - GoogleUtilities/Logger
+  - GoogleUtilities/UserDefaults (5.3.3):
+    - GoogleUtilities/Logger
+  - gRPC (1.14.0):
+    - gRPC-RxLibrary (= 1.14.0)
+    - gRPC/Main (= 1.14.0)
+  - "gRPC-C++ (0.0.3)":
+    - "gRPC-C++/Implementation (= 0.0.3)"
+    - "gRPC-C++/Interface (= 0.0.3)"
+  - "gRPC-C++/Implementation (0.0.3)":
+    - "gRPC-C++/Interface (= 0.0.3)"
+    - gRPC-Core (= 1.14.0)
     - nanopb (~> 0.3)
-  - gRPC-Core/Interface (1.13.0)
-  - gRPC-ProtoRPC (1.13.0):
-    - gRPC-ProtoRPC/Main (= 1.13.0)
-  - gRPC-ProtoRPC/Main (1.13.0):
-    - gRPC (= 1.13.0)
-    - gRPC-RxLibrary (= 1.13.0)
+  - "gRPC-C++/Interface (0.0.3)"
+  - gRPC-Core (1.14.0):
+    - gRPC-Core/Implementation (= 1.14.0)
+    - gRPC-Core/Interface (= 1.14.0)
+  - gRPC-Core/Implementation (1.14.0):
+    - BoringSSL (~> 10.0)
+    - gRPC-Core/Interface (= 1.14.0)
+    - nanopb (~> 0.3)
+  - gRPC-Core/Interface (1.14.0)
+  - gRPC-ProtoRPC (1.14.0):
+    - gRPC-ProtoRPC/Main (= 1.14.0)
+  - gRPC-ProtoRPC/Main (1.14.0):
+    - gRPC (= 1.14.0)
+    - gRPC-RxLibrary (= 1.14.0)
     - Protobuf (~> 3.0)
-  - gRPC-RxLibrary (1.13.0)
-  - gRPC/Main (1.13.0):
-    - gRPC-Core (= 1.13.0)
-    - gRPC-RxLibrary (= 1.13.0)
+  - gRPC-RxLibrary (1.14.0)
+  - gRPC/Main (1.14.0):
+    - gRPC-Core (= 1.14.0)
+    - gRPC-RxLibrary (= 1.14.0)
   - GTMOAuth2 (1.1.6):
     - GTMSessionFetcher (~> 1.1)
   - GTMSessionFetcher (1.1.15):
@@ -142,7 +185,7 @@ PODS:
   - nanopb/encode (0.3.8)
   - path_provider (0.0.1):
     - Flutter
-  - Protobuf (3.6.0)
+  - Protobuf (3.6.1)
   - shared_preferences (0.0.1):
     - Flutter
 
@@ -165,15 +208,19 @@ SPEC REPOS:
     - Firebase
     - FirebaseAnalytics
     - FirebaseAuth
+    - FirebaseAuthInterop
     - FirebaseCore
     - FirebaseDatabase
     - FirebaseFirestore
     - FirebaseInstanceID
     - FirebaseMessaging
     - FirebaseStorage
+    - GoogleAppMeasurement
     - GoogleSignIn
     - GoogleToolboxForMac
+    - GoogleUtilities
     - gRPC
+    - "gRPC-C++"
     - gRPC-Core
     - gRPC-ProtoRPC
     - gRPC-RxLibrary
@@ -208,37 +255,41 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/shared_preferences/ios"
 
 SPEC CHECKSUMS:
-  BoringSSL: cf3f1793eb6e3c445c4d150456341f149c268a35
+  BoringSSL: e10f92a27043805c01071fe815a5cd98ae8212e7
   cloud_firestore: a2d49d9c7219fce31033eb1a2ee953d7733c91d6
-  Firebase: 355bd535bfdacaa82a7fe8d9784115edefd6fc03
+  Firebase: 6691d47562a780c26281ce8464518faafc90c610
   firebase_auth: 27a5a77a032d557c18f8e223aaf8ec1368f6cdbc
   firebase_core: c96aa8b2fcf7f5167d32f22034f502f9304952b8
   firebase_messaging: a5f5d4a9491b660f33a1f94bd0596558f820bad1
   firebase_storage: e34d30ff8bb57e691191b70e9d255ec2eba2351f
-  FirebaseAnalytics: b3628aea54c50464c32c393fb2ea032566e7ecc2
-  FirebaseAuth: 096e457cdd4274412a66c4a35874787e411f5a03
-  FirebaseCore: 4c28e3b9708ba48a765e76515f913a71596eb5dd
-  FirebaseDatabase: 27be5ac5bc75e0b17537b2bbfada8258addcc8cd
-  FirebaseFirestore: d4a3a7787624e612298a320da95935b8dc036c1d
-  FirebaseInstanceID: f3f0657372592ecdfdfe2cac604a5a75758376a6
-  FirebaseMessaging: f43eb0c0e1da096e659de6f713038e74862a62cd
-  FirebaseStorage: 7ca4bb7b58a25fa647b04f524033fc7cb7eb272b
+  FirebaseAnalytics: 831f1f127f4a75698e9875a87bf7e2668730d953
+  FirebaseAuth: 504b198ceb3472dca5c65bb95544ea44cfc9439e
+  FirebaseAuthInterop: 0ffa57668be100582bb7643d4fcb7615496c41fc
+  FirebaseCore: c6079de64c1a87000e52e9b408dddcadc901177f
+  FirebaseDatabase: e2bcbc106adc4b11a2da3ec2eb63c0c4a44f2f54
+  FirebaseFirestore: 45a9a3045a2dc27f23c13bf832556fe287fbe1b5
+  FirebaseInstanceID: 78ba376fcd5b94c001f9999b2cbd3d1f1e56e78d
+  FirebaseMessaging: 000b32447b461b34b6b912b23ec11be20b503b5b
+  FirebaseStorage: fd82e5e5c474897e19972b34b22ac0f589dce04e
   Flutter: 9d0fac939486c9aba2809b7982dfdbb47a7b0296
   fluttertoast: ad0527b15297baf11349f3f581dae4d40f24f340
   google_sign_in: cbeb57b96679823d14df6b2240b629b983a42d79
+  GoogleAppMeasurement: 2b3a023a61239c8d002e6e4fcf4abce8eddce0e0
   GoogleSignIn: d9ef55b10f0aa401a5de2747f59b725e4b9732ac
   GoogleToolboxForMac: 91c824d21e85b31c2aae9bb011c5027c9b4e738f
-  gRPC: 81b990caa01d7c32605d300c2ffd1b5ba0ef9e49
-  gRPC-Core: a56b086a8ef5ced6f6ba5be5bc0a63fca185015a
-  gRPC-ProtoRPC: 842797fbe05dfcf891afb4a5048e5ccf5f06ef86
-  gRPC-RxLibrary: fa6852f98d6ec0b73c0ec2f6406c26943099d501
+  GoogleUtilities: 8208aee3e97a1ae93d44c57e96c476a5a3b03f0a
+  gRPC: 9d4c549f37c7cef22478634bac7a0405b6e3dbfb
+  "gRPC-C++": ee0b01db3122f0b6c2be28b5b11039f62fa15fe6
+  gRPC-Core: f4836515817c0eb479aeeb9cc27c91c4ba62a9f6
+  gRPC-ProtoRPC: 76f6053639a842e1fb45fa82aa598bf3f4d9f66f
+  gRPC-RxLibrary: 3c305f32155024b116b780f389323c73a28197e6
   GTMOAuth2: c77fe325e4acd453837e72d91e3b5f13116857b2
   GTMSessionFetcher: 5fa5b80fd20e439ef5f545fb2cb3ca6c6714caa2
   image_picker: ee00aab0487cedc80a304085219503cc6d0f2e22
   leveldb-library: 08cba283675b7ed2d99629a4bc5fd052cd2bb6a5
   nanopb: 5601e6bca2dbf1ed831b519092ec110f66982ca3
   path_provider: 09407919825bfe3c2deae39453b7a5b44f467873
-  Protobuf: 0fc0ad8bec688b2a3017a139953e01374fedbd5f
+  Protobuf: 1eb9700044745f00181c136ef21b8ff3ad5a0fd5
   shared_preferences: 5a1d487c427ee18fcd3ea1f2a131569481834b53
 
 PODFILE CHECKSUM: 1e5af4103afd21ca5ead147d7b81d06f494f51a2
