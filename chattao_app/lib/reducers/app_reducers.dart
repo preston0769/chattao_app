@@ -3,8 +3,15 @@ import 'package:chattao_app/models/app_state.dart';
 
 AppState appReducer(AppState state, action){
 
+
+  if(action is UpdateStatusAction){
+    state.message = action.statusMsg;
+    return state;
+  }
   if(action is NewChatMsgReceivedAction){
     state.message = action.msg.content;
+    var chat = state.chats.where((chat)=>chat.peer.uid == action.msg.idFrom).first;
+    chat.latestMsg = action.msg;
     return state;
   }
 

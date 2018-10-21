@@ -85,6 +85,7 @@ class ChatScreenState extends State<ChatScreen> {
       new TextEditingController();
   final ScrollController listScrollController = new ScrollController();
   final FocusNode focusNode = new FocusNode();
+  StreamSubscription<QuerySnapshot> subscription = null;
 
   @override
   void initState() {
@@ -98,7 +99,7 @@ class ChatScreenState extends State<ChatScreen> {
     imageUrl = '';
 
     readLocal().then((onValue) {
-      Firestore.instance
+     subscription =  Firestore.instance
           .collection('messages')
           .document(groupChatId)
           .collection(groupChatId)
@@ -108,8 +109,36 @@ class ChatScreenState extends State<ChatScreen> {
           .listen((snapShot) {
         listMessage = snapShot.documents;
         _updateLocalMessageList(snapShot);
+        _clearUnreadCount();
         // print(snapShot.documents[1].data);
       });
+    });
+  }
+
+  _clearUnreadCount() {
+    var chatListReference =
+        Firestore.instance.collection('messages').document(groupChatId);
+
+    chatListReference.get().then((message) {
+      if (message.data.length > 0) {
+        Firestore.instance.runTransaction((transaction) async {
+          await transaction.update(
+            chatListReference,
+            {
+              'unread-$myId': 0,
+              'lastUpdated': DateTime.now().millisecondsSinceEpoch.toString(),
+            },
+          );
+        });
+      } else {
+        chatListReference.setData({
+          'uids': [peerId, myId],
+          'lastUpdated': DateTime.now().millisecondsSinceEpoch.toString(),
+          'unread-$peerId': 0,
+          'unread-$myId': 0,
+          'lastmsg': "",
+        });
+      }
     });
   }
 
@@ -117,6 +146,7 @@ class ChatScreenState extends State<ChatScreen> {
   dispose() {
     focusNode.removeListener(onFocusChange);
     _chatMessages.clear();
+    subscription.cancel();
     super.dispose();
   }
 
@@ -156,7 +186,7 @@ class ChatScreenState extends State<ChatScreen> {
           var chatMsg = _chatMessages.firstWhere(
               (message) => message.timeStamp == document['timestamp'],
               orElse: () {});
-          chatMsg.documentId = document.documentID;
+          if (chatMsg != null) chatMsg.documentId = document.documentID;
         }
       });
     }

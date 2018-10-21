@@ -19,31 +19,50 @@ export const triggerMessage = functions.firestore
 
     var tokenRefPromise = admin
       .firestore()
-      .collection("devicetokens").doc(message.idTo).get();
+      .collection("devicetokens")
+      .doc(message.idTo)
+      .get();
     var userRefPromise = admin
       .firestore()
-      .collection("users").doc(message.idFrom).get();
+      .collection("users")
+      .doc(message.idFrom)
+      .get();
 
-    return Promise.all([tokenRefPromise, userRefPromise])
+    var chatPromise = admin
+      .firestore()
+      .collection("messages")
+      .doc(context.params.messageId)
+      .get();
+
+    return Promise.all([tokenRefPromise, userRefPromise, chatPromise])
       .then(results => {
-
         var tokenRef = results[0];
         var userRef = results[1];
+        var chatRef = results[2];
         console.log(tokenRef.data());
         console.log(userRef.data());
+        console.log(chatRef.data());
 
         var targetToken = tokenRef.data().token;
         var user = userRef.data();
+        var chat = chatRef.data();
 
-        const content = message.type === 1?"[Image]":message.type===2?"[Sticker]":(message.content as String).substring(0,27);
+        const content =
+          message.type === 1
+            ? "[Image]"
+            : message.type === 2
+              ? "[Sticker]"
+              : (message.content as String).substring(0, 27);
         const payload = {
           notification: {
             title: user.name,
-            body:content,
+            body: content,
+            badge: chat[`unread-${message.idTo}`].toString(),
+            sound: "default"
           },
-          data:{
+          data: {
             idFrom: message.idFrom,
-            click_action:"FLUTTER_NOTIFICATION_CLICK",
+            click_action: "FLUTTER_NOTIFICATION_CLICK"
           }
         };
         admin

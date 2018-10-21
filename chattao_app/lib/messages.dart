@@ -1,7 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chattao_app/constants.dart';
+import 'package:chattao_app/models/app_state.dart';
 import 'package:chattao_app/models/chat_message.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_redux/flutter_redux.dart';
 
 class ImageMessageContent extends StatelessWidget {
   final ChatMessage message;
@@ -127,6 +129,9 @@ class BaseMessageView extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
         onLongPress: () {
+          var me = StoreProvider.of<AppState>(context).state.me;
+          if(me.uid != message.idFrom)
+           return;
           _handleDelete(context);
         },
         child: child);

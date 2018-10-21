@@ -1,4 +1,3 @@
-
 import 'dart:async';
 import 'dart:io';
 
@@ -56,21 +55,18 @@ class ChatMessage {
     final chatState = (chatScreenKey.currentState as ChatScreenState);
     chatState.chatMessages.remove(this);
     chatState.onMessageDelele();
-     
+
     deleteOnServer(this);
   }
 
   void deleteOnServer(ChatMessage message) async {
-
-    if(message.type == 1){
-
-    }
+    if (message.type == 1) {}
     var documentReference = Firestore.instance
         .collection('messages')
         .document(message.chatId)
         .collection(message.chatId)
         .document(message.documentId);
-        documentReference.delete();
+    documentReference.delete();
 
     // Firestore.instance.runTransaction((transaction) async {
     //   await transaction.delete(documentReference);
@@ -87,22 +83,31 @@ class ChatMessage {
           .collection(chatId)
           .document(DateTime.now().millisecondsSinceEpoch.toString());
 
-      var chatListReference = Firestore.instance.collection('messages').document(chatId);
-      chatListReference.get().then((message){
-
-        if(message.data !=null)
-          return ;
-        
-
-         chatListReference.setData({
-           'uids': [idFrom,idTo],
-           'lastUpdated': DateTime.now().millisecondsSinceEpoch.toString(),
-           'unreadMessage':0
-         });
-       
-
+      var chatListReference =
+          Firestore.instance.collection('messages').document(chatId);
+      var contentShort = type==1?"[Image]":type==2?"[Sticker]":content;
+      chatListReference.get().then((message) {
+        if (message.data.length>0) {
+          Firestore.instance.runTransaction((transaction) async {
+            await transaction.update(
+              chatListReference,
+              {
+                'lastmsg':contentShort,
+                'unread-$idTo': message['unread-$idTo']+1,
+                'lastUpdated': this.timeStamp,
+              },
+            );
+          });
+        } else {
+          chatListReference.setData({
+            'uids': [idFrom, idTo],
+            'lastUpdated': DateTime.now().millisecondsSinceEpoch.toString(),
+            'unread-$idFrom': 0,
+            'unread-$idTo':1 ,
+            'lastmsg':contentShort,
+          });
+        }
       });
-      
 
       Firestore.instance.runTransaction((transaction) async {
         await transaction.set(
@@ -115,10 +120,12 @@ class ChatMessage {
             'type': type
           },
         );
+
         syncing = false;
         synced = true;
       });
     } catch (error) {
+      print(error);
       syncing = false;
       syncFailed = true;
       return;

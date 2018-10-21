@@ -60,13 +60,11 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     super.initState();
     _configFireBaseMessage();
     WidgetsBinding.instance.addObserver(this);
-    print("App inited");
     activeScreen = LoginPage();
     _loadLocalActiveMessage();
   }
 
   void _loadLocalActiveMessage() async {
-    print('hello');
     reduxStore.dispatch(StartLoadActiveChatAction());
     List<Chat> chatList = await readChatList();
     if (chatList != null && chatList.length > 0)
@@ -92,8 +90,17 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
           User peer = users.where((user) => user.uid == peerId).first;
 
           Chat chat = new Chat(me, peer);
+
           chat.lastUpdated = DateTime.fromMillisecondsSinceEpoch(
               int.parse(document['lastUpdated']));
+          chat.unreadMessage = document['unread-${chat.me.uid}'];
+          ChatMessage lastmsg = new ChatMessage(
+              idFrom: peer.uid,
+              idTo: me.uid,
+              timeStamp: document['lastUpdated'],
+              content: document['lastmsg'],
+              type: -1);
+          chat.latestMsg = lastmsg;
           chats.add(chat);
         }
       });
@@ -104,8 +111,6 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
   Future _getAllFriends(User me) async {
     Firestore.instance.collection('users').snapshots().listen((snapshot) {
-      print(snapshot.documents);
-
       List<User> friends = new List();
       snapshot.documents.forEach((document) {
         var uid = document['id'];
@@ -117,10 +122,13 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
           friends.add(friend);
         }
       });
+      // reduxStore.dispatch(UpdateStatusAction("In get all friends"));
 
       reduxStore.dispatch(UpdateFriends(friends));
       if (reduxStore.state.targetPeerId != null &&
-          reduxStore.state.targetPeerId.isNotEmpty) _handleJumpOver();
+          reduxStore.state.targetPeerId.isNotEmpty) {
+        _handleJumpOver();
+      }
     });
   }
 
@@ -142,24 +150,26 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     _firebaseMessaging.configure(
       onMessage: (Map<String, dynamic> message) async {
         var idFrom = message['idFrom'];
-        print("onMessage: $idFrom");
+        var body = message['aps']['alert']['body'];
         var chatMsg = new ChatMessage(
-            content: message.toString(),
+            content: body,
             idFrom: idFrom,
             idTo: "Null",
-            timeStamp: "88888",
+            timeStamp: DateTime.now().millisecondsSinceEpoch.toString(),
             type: 0);
         reduxStore.dispatch(NewChatMsgReceivedAction(chatMsg));
       },
       onLaunch: (Map<String, dynamic> message) async {
+        reduxStore.dispatch(UpdateStatusAction("On Lauch"));
         var idFrom = message['idFrom'];
+
+        var body = message['aps']['alert']['body'];
         var chatMsg = new ChatMessage(
-            content: message.toString(),
+            content: body,
             idFrom: idFrom,
             idTo: "Null",
-            timeStamp: "88888",
+            timeStamp: DateTime.now().millisecondsSinceEpoch.toString(),
             type: 0);
-
         reduxStore.dispatch(NewChatMsgReceivedAction(chatMsg));
 
         if (reduxStore.state.friends.length > 0) {

@@ -106,14 +106,14 @@ class _SMSLoginPageState extends State<SMSLoginPage> {
       await prefs.setString('name', name);
       await prefs.setString('photoUrl', photoURL);
 
-      await AddDeviceTokenIfNotExists(firebaseUser, context);
+      await addDeviceTokenIfNotExists(firebaseUser, context);
     }
   }
 
-  Future AddDeviceTokenIfNotExists(
+  Future addDeviceTokenIfNotExists(
       FirebaseUser firebaseUser, BuildContext context) async {
+    Store<AppState> reduxStore = StoreProvider.of<AppState>(context);
 
-    Store<AppState> reduxStore = (mainAppKey.currentWidget as MyApp).store;
     var token = reduxStore.state.pushNotificationToken;
 
     final QuerySnapshot result = await Firestore.instance
@@ -132,15 +132,13 @@ class _SMSLoginPageState extends State<SMSLoginPage> {
         'deleted': false,
         'uid': firebaseUser.uid
       });
-    }
-    else{
+    } else {
       Firestore.instance
           .collection('devicetokens')
           .document(firebaseUser.uid)
           .updateData({
         'token': token,
       });
-
     }
   }
 

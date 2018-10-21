@@ -9,6 +9,7 @@ class Chat{
   bool enableNotification = true;
   bool isFavorite;
   ChatMessage latestMsg;
+  int unreadMessage = 0;
   Chat(this.me,this.peer,{this.latestMsg});
 
   factory Chat.init(me,peer)=>Chat(me,peer);

@@ -27,69 +27,6 @@ class _ChatListPageState extends State<ChatListPage> {
     });
   }
 
-  void _loadChatScreen(BuildContext context, Chat chat) {
-    Navigator.push(
-        context,
-        new MaterialPageRoute(
-            builder: (context) => new ChatView(
-                  peerId: chat.peer.uid,
-                  peerAvatar: chat.peer.avataURL,
-                  peerName: chat.peer.name,
-                )));
-  }
-
-  Widget _buildListItem(BuildContext context, Chat chat) {
-    return new ListTile(
-        key: new ValueKey(chat.hashCode),
-        title: new Container(
-          decoration: new BoxDecoration(
-            border: new Border(
-                bottom: BorderSide(
-                    width: 1.0,
-                    color: const Color(0x88888888),
-                    style: BorderStyle.solid)),
-            // borderRadius: new BorderRadius.circular(5.0),
-          ),
-          padding: const EdgeInsets.all(10.0),
-          child: new Row(
-            children: <Widget>[
-              ClipRRect(
-                borderRadius: BorderRadius.all(Radius.circular(8.0)),
-                child: CachedNetworkImage(
-                  placeholder: Container(
-                    child: CircularProgressIndicator(
-                      strokeWidth: 1.0,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                          Theme.of(context).primaryColor),
-                    ),
-                    width: 40.0,
-                    height: 40.0,
-                    padding: EdgeInsets.all(15.0),
-                  ),
-                  imageUrl: chat.peer.avataURL,
-                  width: 50.0,
-                  height: 50.0,
-                  fit: BoxFit.cover,
-                ),
-              ),
-              SizedBox(
-                width: 20.0,
-              ),
-              new Expanded(
-                child: new Text(chat.peer.name),
-              ),
-              new Text(
-                chat.peer.uid.substring(20),
-              ),
-            ],
-          ),
-        ),
-        onTap: () {
-          // _toggleOnlineStatus(document);
-          _loadChatScreen(context, chat);
-        });
-  }
-
   @override
   void initState() {
     super.initState();
@@ -163,25 +100,138 @@ class _ChatListPageState extends State<ChatListPage> {
                             padding: const EdgeInsets.only(top: 10.0),
                             // itemExtent: 25.0,
                             itemBuilder: (context, index) {
-                              return _buildListItem(
-                                  context, chatList.elementAt(index));
+                              return ChatListItem(chatList.elementAt(index));
                             });
                       }),
                     ),
-                    StoreConnector<AppState, String>(
-                      converter: (store) {
-                        return store.state.message;
-                      },
-                      builder: (context, content) {
-                        return Center(
-                            child: new Text(content ?? "Nothing is here"));
-                      },
-                    ),
+                    // StoreConnector<AppState, String>(
+                    //   converter: (store) {
+                    //     return store.state.message;
+                    //   },
+                    //   builder: (context, content) {
+                    //     return Center(
+                    //         child: new Text(content ?? "Nothing is here"));
+                    //   },
+                    // ),
                   ],
                 ),
               ),
             ),
       onWillPop: () {},
     );
+  }
+}
+
+class ChatListItem extends StatelessWidget {
+  final Chat chat;
+  ChatListItem(this.chat);
+
+  void _loadChatScreen(BuildContext context, Chat chat) {
+    Navigator.push(
+        context,
+        new MaterialPageRoute(
+            builder: (context) => new ChatView(
+                  peerId: chat.peer.uid,
+                  peerAvatar: chat.peer.avataURL,
+                  peerName: chat.peer.name,
+                )));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return new ListTile(
+        key: new ValueKey(chat.hashCode),
+        title: new Container(
+          decoration: new BoxDecoration(
+            border: new Border(
+                bottom: BorderSide(
+                    width: 0.3,
+                    color: const Color(0x88888888),
+                    style: BorderStyle.solid)),
+            // borderRadius: new BorderRadius.circular(5.0),
+          ),
+          padding: const EdgeInsets.only(top: 10.0,  bottom: 10.0),
+          child: new Row(
+            children: <Widget>[
+              Stack(
+                children: <Widget>[
+                  ClipRRect(
+                    borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                    child: CachedNetworkImage(
+                      placeholder: Container(
+                        child: CircularProgressIndicator(
+                          strokeWidth: 0.3,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                              Theme.of(context).primaryColor),
+                        ),
+                        width: 48.0,
+                        height: 48.0,
+                        padding: EdgeInsets.all(12.0),
+                      ),
+                      imageUrl: chat.peer.avataURL,
+                      width: 48.0,
+                      height: 48.0,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  chat.unreadMessage > 0
+                      ? Positioned(
+                          right: 0.0,
+                          top: 0.0,
+                          child: Transform(
+                            transform:
+                                Matrix4.translationValues(8.0, -8.0, 0.0),
+                            child: Container(
+                              width: 20.0,
+                              height: 20.0,
+                              decoration: BoxDecoration(
+                                  color: Colors.red,
+                                  borderRadius: BorderRadius.circular(10.0)),
+                              child: Center(
+                                  child: Text(
+                                chat.unreadMessage.toString(),
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 12.0),
+                              )),
+                            ),
+                          ),
+                        )
+                      : Container()
+                ],
+              ),
+              SizedBox(
+                width: 12.0,
+              ),
+              new Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Container( child: new Text(chat.peer.name)),
+                    Container(
+                      padding: EdgeInsets.only(top: 8.0),
+                      child: chat.latestMsg != null
+                          ? new Text(
+                              chat.latestMsg.content,
+                              style: TextStyle(color: Colors.grey, fontSize: 12.0),
+                            )
+                          : new Container(),
+                    )
+                  ],
+                ),
+              ),
+              new Text(
+                chat.latestMsg != null
+                    ? chat.lastUpdated.millisecondsSinceEpoch.toString()
+                    : "Never",
+                style: TextStyle(fontSize: 12.0, color: Colors.grey),
+              ),
+            ],
+          ),
+        ),
+        onTap: () {
+          // _toggleOnlineStatus(document);
+          _loadChatScreen(context, chat);
+        });
   }
 }

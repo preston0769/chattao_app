@@ -6,6 +6,11 @@ class NewChatMsgReceivedAction {
   NewChatMsgReceivedAction(this.msg);
 }
 
+class UpdateStatusAction{
+  String statusMsg;
+  UpdateStatusAction(this.statusMsg);
+}
+
 class UpdatePushNotificationTokenAction {
   final String token;
 
