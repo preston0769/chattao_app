@@ -9,6 +9,7 @@ import 'package:chattao_app/models/app_state.dart';
 import 'package:chattao_app/models/chat.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:redux/redux.dart';
@@ -115,10 +116,11 @@ class _SMSLoginPageState extends State<SMSLoginPage> {
     Store<AppState> reduxStore = StoreProvider.of<AppState>(context);
 
     var token = reduxStore.state.pushNotificationToken;
-
+    if(token == null)
+        token = await FirebaseMessaging().getToken();
     final QuerySnapshot result = await Firestore.instance
         .collection('devicetokens')
-        .where('userId', isEqualTo: firebaseUser.uid)
+        .where('uid', isEqualTo: firebaseUser.uid)
         .getDocuments();
     final List<DocumentSnapshot> documents = result.documents;
     if (documents.length == 0) {

@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:chattao_app/actions/app_actions.dart';
 import 'package:chattao_app/chats.dart';
 import 'package:chattao_app/common.dart';
 import 'package:chattao_app/models/app_state.dart';
@@ -16,22 +17,53 @@ class _FriendsPageState extends State<FriendsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Contacts"),
-      ),
-      body: Container(
-        child: StoreConnector<AppState, List<User>>(
-          converter: (store) {
-            return store.state.friends;
-          },
-          builder: (context, friends) {
-            return ListView.builder(
-              itemCount: friends.length,
-              itemBuilder: (context, index) {
-                return new ContactItemView(context, friends.elementAt(index));
-              },
-            );
-          },
+        title: Text(
+          "Contacts",
+          style: TextStyle(color: Colors.white),
         ),
+      ),
+      body: Column(
+        children: <Widget>[
+          Container(
+            padding: EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 0.0),
+            child: TextField(
+              decoration: InputDecoration(
+                enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(style: BorderStyle.none)),
+                contentPadding: EdgeInsets.all(0.0),
+                prefixIcon: Icon(
+                  Icons.search,
+                  color: Colors.black,
+                ),
+                fillColor: Colors.white.withAlpha(200),
+                filled: true,
+                border: OutlineInputBorder(
+                    borderSide: BorderSide(
+                        color: Colors.black.withAlpha(200),
+                        width: 1.0,
+                        style: BorderStyle.solid),
+                    borderRadius: BorderRadius.circular(8.0)),
+                hintText: "Search friend",
+              ),
+            ),
+          ),
+          Expanded(
+            child: StoreConnector<AppState, List<User>>(
+              converter: (store) {
+                return store.state.friends;
+              },
+              builder: (context, friends) {
+                return ListView.builder(
+                  itemCount: friends.length,
+                  itemBuilder: (context, index) {
+                    return new ContactItemView(
+                        context, friends.elementAt(index));
+                  },
+                );
+              },
+            ),
+          ),
+        ],
       ),
       bottomNavigationBar: BottomBar(
         context: context,
@@ -49,12 +81,14 @@ class ContactItemView extends StatelessWidget {
   void _navToChatPage() {
     Navigator.push(
         context,
-        new MaterialPageRoute(
-            builder: (context) => new ChatView(
-                  peerId: contact.uid,
-                  peerAvatar: contact.avataURL,
-                  peerName: contact.name,
-                )));
+        new ScaleRoute(
+            widget: new ChatView(
+          peerId: contact.uid,
+          peerAvatar: contact.avataURL,
+          peerName: contact.name,
+        )));
+    StoreProvider.of<AppState>(context)
+        .dispatch(UpdateRouteNameAction("/chatView"));
   }
 
   @override

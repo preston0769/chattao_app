@@ -1,4 +1,3 @@
-
 import 'package:chattao_app/chat_list.dart';
 import 'package:chattao_app/constants.dart';
 import 'package:chattao_app/friends.dart';
@@ -31,11 +30,14 @@ class BottomBar extends StatelessWidget {
       color: Color(0xFFDCDCDC),
       child: SafeArea(
         child: Container(
-            padding: EdgeInsets.only(top: 8.0,bottom: 8.0),
+            padding: EdgeInsets.only(top: 8.0, bottom: 8.0),
             constraints: BoxConstraints(maxHeight: 58.0),
-             decoration: BoxDecoration(
-                border: Border( top: BorderSide( width: 0.3, style: BorderStyle.solid, color: Colors.grey))
-             ),
+            decoration: BoxDecoration(
+                border: Border(
+                    top: BorderSide(
+                        width: 0.3,
+                        style: BorderStyle.solid,
+                        color: Colors.grey))),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
@@ -86,7 +88,7 @@ class NavBarItem extends StatelessWidget {
           children: <Widget>[
             Icon(
               iconData,
-              color: isFocused ? themeColor : Colors.white.withAlpha(160),
+              color: isFocused ? themeColor : Colors.black.withAlpha(160),
             ),
             Text(title,
                 style: TextStyle(
@@ -97,4 +99,48 @@ class NavBarItem extends StatelessWidget {
       ),
     );
   }
+}
+
+class ScaleRoute extends PageRouteBuilder {
+  final Widget widget;
+  ScaleRoute({this.widget})
+      : super(pageBuilder: (BuildContext context, Animation<double> animation,
+            Animation<double> secondaryAnimation) {
+          return widget;
+        }, transitionsBuilder: (BuildContext context,
+            Animation<double> animation,
+            Animation<double> secondaryAnimation,
+            Widget child) {
+          return new ScaleTransition(
+            scale: new Tween<double>(
+              begin: 0.0,
+              end: 1.0,
+            ).animate(
+              CurvedAnimation(
+                parent: animation,
+                curve: Interval(
+                  0.00,
+                  0.50,
+                  curve: Curves.bounceOut,
+                ),
+              ),
+            ),
+            child: ScaleTransition(
+              scale: Tween<double>(
+                begin: 1.1,
+                end: 1.0,
+              ).animate(
+                CurvedAnimation(
+                  parent: animation,
+                  curve: Interval(
+                    0.50,
+                    1.00,
+                    curve: Curves.bounceIn,
+                  ),
+                ),
+              ),
+              child: child,
+            ),
+          );
+        });
 }

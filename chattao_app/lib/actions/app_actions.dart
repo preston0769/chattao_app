@@ -54,4 +54,8 @@ class SetJumpToPeerAction{
 
 class ClearJumpToPeerAction{
 }
+class UpdateRouteNameAction{
+   final String routeName;
+   UpdateRouteNameAction(this.routeName);
+}
 

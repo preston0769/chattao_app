@@ -1,5 +1,6 @@
 import 'package:chattao_app/actions/app_actions.dart';
 import 'package:chattao_app/chats.dart';
+import 'package:chattao_app/common.dart';
 import 'package:chattao_app/keys/global_keys.dart';
 import 'package:chattao_app/local_processing/local_rw.dart';
 import 'package:chattao_app/login.dart';
@@ -136,13 +137,18 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     User peer = reduxStore.state.friends
         .where((friend) => friend.uid == reduxStore.state.targetPeerId)
         .first;
-    Navigator.push(context, new CupertinoPageRoute(builder: (context) {
-      return new ChatView(
-        peerId: peer.uid,
-        peerName: peer.name,
-        peerAvatar: peer.avataURL,
-      );
-    }));
+
+    var newRoute = new ScaleRoute(
+        widget: new ChatView(
+      peerId: peer.uid,
+      peerName: peer.name,
+      peerAvatar: peer.avataURL,
+    ));
+
+    if (reduxStore.state.currentRouteName != "/chatView") {
+      Navigator.push(context, newRoute);
+      reduxStore.dispatch(UpdateRouteNameAction("/chatView"));
+    }
   }
 
   void _configFireBaseMessage() {

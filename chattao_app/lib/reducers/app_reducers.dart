@@ -8,6 +8,11 @@ AppState appReducer(AppState state, action){
     state.message = action.statusMsg;
     return state;
   }
+
+  if(action is UpdateRouteNameAction){
+    state.currentRouteName = action.routeName;
+    return state;
+  }
   if(action is NewChatMsgReceivedAction){
     state.message = action.msg.content;
     var chat = state.chats.where((chat)=>chat.peer.uid == action.msg.idFrom).first;

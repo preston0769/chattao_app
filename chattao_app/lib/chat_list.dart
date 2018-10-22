@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:chattao_app/actions/app_actions.dart';
 import 'package:chattao_app/chats.dart';
 import 'package:chattao_app/common.dart';
 import 'package:chattao_app/models/app_state.dart';
@@ -66,29 +67,6 @@ class _ChatListPageState extends State<ChatListPage> {
               body: SafeArea(
                 child: Column(
                   children: <Widget>[
-                    Container(
-                      padding: EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 0.0),
-                      child: TextField(
-                        decoration: InputDecoration(
-                          enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(style: BorderStyle.none)),
-                          contentPadding: EdgeInsets.all(0.0),
-                          prefixIcon: Icon(
-                            Icons.search,
-                            color: Colors.black,
-                          ),
-                          fillColor: Colors.white.withAlpha(200),
-                          filled: true,
-                          border: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                  color: Colors.black.withAlpha(200),
-                                  width: 1.0,
-                                  style: BorderStyle.solid),
-                              borderRadius: BorderRadius.circular(8.0)),
-                          hintText: "Search friend",
-                        ),
-                      ),
-                    ),
                     Expanded(
                       child: StoreConnector<AppState, List<Chat>>(
                           converter: (store) {
@@ -129,12 +107,14 @@ class ChatListItem extends StatelessWidget {
   void _loadChatScreen(BuildContext context, Chat chat) {
     Navigator.push(
         context,
-        new MaterialPageRoute(
-            builder: (context) => new ChatView(
-                  peerId: chat.peer.uid,
-                  peerAvatar: chat.peer.avataURL,
-                  peerName: chat.peer.name,
-                )));
+        ScaleRoute(
+            widget: new ChatView(
+          peerId: chat.peer.uid,
+          peerAvatar: chat.peer.avataURL,
+          peerName: chat.peer.name,
+        )));
+    StoreProvider.of<AppState>(context)
+        .dispatch(UpdateRouteNameAction("/chatView"));
   }
 
   @override
@@ -150,7 +130,7 @@ class ChatListItem extends StatelessWidget {
                     style: BorderStyle.solid)),
             // borderRadius: new BorderRadius.circular(5.0),
           ),
-          padding: const EdgeInsets.only(top: 10.0,  bottom: 10.0),
+          padding: const EdgeInsets.only(top: 10.0, bottom: 10.0),
           child: new Row(
             children: <Widget>[
               Stack(
@@ -207,13 +187,14 @@ class ChatListItem extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
-                    Container( child: new Text(chat.peer.name)),
+                    Container(child: new Text(chat.peer.name)),
                     Container(
                       padding: EdgeInsets.only(top: 8.0),
                       child: chat.latestMsg != null
                           ? new Text(
                               chat.latestMsg.content,
-                              style: TextStyle(color: Colors.grey, fontSize: 12.0),
+                              style:
+                                  TextStyle(color: Colors.grey, fontSize: 12.0),
                             )
                           : new Container(),
                     )

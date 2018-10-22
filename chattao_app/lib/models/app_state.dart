@@ -11,6 +11,7 @@ class AppState{
   InitState initState =  InitState.Initing;
   String message = "--";
   String pushNotificationToken;
+  String currentRouteName = "route";
 
   AppState(this.chats, this.friends, this.logined);
 

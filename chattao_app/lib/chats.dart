@@ -9,6 +9,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:chattao_app/constants.dart';
+import 'package:flutter/rendering.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
@@ -84,13 +85,27 @@ class ChatScreenState extends State<ChatScreen> {
   final TextEditingController textEditingController =
       new TextEditingController();
   final ScrollController listScrollController = new ScrollController();
+
   final FocusNode focusNode = new FocusNode();
   StreamSubscription<QuerySnapshot> subscription = null;
+
+  Offset drawStart = null;
 
   @override
   void initState() {
     super.initState();
     focusNode.addListener(onFocusChange);
+    listScrollController.addListener(() {
+      if ((focusNode.hasFocus || isShowSticker) && 
+          listScrollController.position.userScrollDirection ==
+              ScrollDirection.reverse) {
+        focusNode.unfocus();
+        setState(() {
+          showBottomSafeArea = true;
+          isShowSticker = false;
+        });
+      }
+    });
 
     groupChatId = '';
 
@@ -99,7 +114,7 @@ class ChatScreenState extends State<ChatScreen> {
     imageUrl = '';
 
     readLocal().then((onValue) {
-     subscription =  Firestore.instance
+      subscription = Firestore.instance
           .collection('messages')
           .document(groupChatId)
           .collection(groupChatId)
@@ -345,17 +360,25 @@ class ChatScreenState extends State<ChatScreen> {
 
             // Time
             shouldShowTimeSplitter(index)
-                ? Container(
-                    child: Text(
-                      DateFormat('dd MMM kk:mm').format(
-                          DateTime.fromMillisecondsSinceEpoch(
-                              int.parse(message.timeStamp))),
-                      style: TextStyle(
-                          color: greyColor,
-                          fontSize: 12.0,
-                          fontStyle: FontStyle.italic),
+                ? Center(
+                    child: Container(
+                      //  alignment: Alignment.center,
+                      padding: EdgeInsets.fromLTRB(12.0, 4.0, 12.0, 4.0),
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(5.0),
+                          color: Colors.grey.shade300),
+                      child: Text(
+                        DateFormat('dd MMM kk:mm').format(
+                            DateTime.fromMillisecondsSinceEpoch(
+                                int.parse(message.timeStamp))),
+                        style: TextStyle(
+                          color: Colors.black.withAlpha(200),
+                          fontSize: 10.0,
+                        ),
+                      ),
+                      margin:
+                          EdgeInsets.only(left: 50.0, top: 5.0, bottom: 5.0),
                     ),
-                    margin: EdgeInsets.only(left: 50.0, top: 5.0, bottom: 5.0),
                   )
                 : Container()
           ],
@@ -373,7 +396,7 @@ class ChatScreenState extends State<ChatScreen> {
 
     var timeDiff = stampNow - stampPre;
 
-    return timeDiff > 1 * 1000 * 60;
+    return timeDiff > 1 * 1000 * 20;
   }
 
   bool shouldShowTimeSplitter(int index) {
@@ -479,20 +502,24 @@ class ChatScreenState extends State<ChatScreen> {
               // Edit text
               Flexible(
                 child: Container(
+                  constraints:  BoxConstraints( maxHeight: 50.0),
                   child: TextField(
-                    style: TextStyle(color: primaryColor, fontSize: 15.0),
-                    controller: textEditingController,
-                    decoration: InputDecoration.collapsed(
-                      hintText: 'Type here...',
-                      hintStyle: TextStyle(color: greyColor),
+                      //  maxLines: 100,
+                       scrollPadding: EdgeInsets.all(4.0),
+                        
+                      style: TextStyle(color: primaryColor, fontSize: 15.0),
+                      controller: textEditingController,
+                      decoration: InputDecoration.collapsed(
+                        hintText: 'Type here...',
+                        hintStyle: TextStyle(color: greyColor),
+                      ),
+                      focusNode: focusNode,
+                      textInputAction: TextInputAction.send,
+                      onSubmitted: (String content) {
+                        onSendMessage(content, 0);
+                        FocusScope.of(context).requestFocus(focusNode);
+                      },
                     ),
-                    focusNode: focusNode,
-                    textInputAction: TextInputAction.send,
-                    onSubmitted: (String content) {
-                      onSendMessage(content, 0);
-                      FocusScope.of(context).requestFocus(focusNode);
-                    },
-                  ),
                 ),
               ),
 
@@ -543,6 +570,19 @@ class ChatScreenState extends State<ChatScreen> {
                         isShowSticker = false;
                         showBottomSafeArea = true;
                       });
+                    },
+                    onVerticalDragDown: (details) {
+                      drawStart = details.globalPosition;
+                    },
+                    onVerticalDragUpdate: (details) {
+                      var currentPos = details.globalPosition;
+                      var diff = currentPos - drawStart;
+                      if (focusNode.hasFocus && diff.dx < 5) {
+                        focusNode.unfocus();
+                      }
+                    },
+                    onVerticalDragEnd: (details) {
+                      drawStart = null;
                     },
                     child: ListView.builder(
                       padding: EdgeInsets.all(10.0),
