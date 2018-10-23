@@ -57,6 +57,7 @@ AppState appReducer(AppState state, action){
    if(action is UpdateChatList){
      state.chats.clear();
      state.chats.addAll(action.chats);
+     state.initState = InitState.Inited;
      return state;
    }
 

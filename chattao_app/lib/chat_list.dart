@@ -8,6 +8,7 @@ import 'package:chattao_app/models/chat.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_redux/flutter_redux.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ChatListPage extends StatefulWidget {
@@ -203,7 +204,7 @@ class ChatListItem extends StatelessWidget {
               ),
               new Text(
                 chat.latestMsg != null
-                    ? chat.lastUpdated.millisecondsSinceEpoch.toString()
+                    ? _convertToDateString(chat.lastUpdated)
                     : "Never",
                 style: TextStyle(fontSize: 12.0, color: Colors.grey),
               ),
@@ -214,5 +215,21 @@ class ChatListItem extends StatelessWidget {
           // _toggleOnlineStatus(document);
           _loadChatScreen(context, chat);
         });
+  }
+
+  String _convertToDateString(DateTime lastUpdateTime) {
+    DateTime now = DateTime.now();
+
+    var diff = now.difference(lastUpdateTime);
+
+    if (diff.inSeconds < 60) return "Just now";
+
+    if (diff.inMinutes < 10) return "A while ago";
+    if (diff.inMinutes < 60) return "Past hour";
+    if (diff.inHours < 5) return "In ${diff.inHours} hours";
+    if (diff.inHours < 24) return "In a day";
+    if (diff.inDays == 1) return "Yesterday";
+
+    return DateFormat("dd MMM").format(lastUpdateTime);
   }
 }

@@ -73,7 +73,7 @@ class ChatMessage {
     // });
   }
 
-  void syncToServer() async {
+  Future syncToServer() async {
     try {
       syncing = true;
       if (type == 1 && localImageFile != null) content = await _uploadFile();

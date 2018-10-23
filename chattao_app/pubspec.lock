@@ -125,6 +125,15 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.1.2"
+  flutter_native_image:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: HEAD
+      resolved-ref: "570cafee663b360c27be9a002d15bda020332f5b"
+      url: "https://github.com/btastic/flutter_native_image.git"
+    source: git
+    version: "0.0.3"
   flutter_redux:
     dependency: "direct main"
     description:

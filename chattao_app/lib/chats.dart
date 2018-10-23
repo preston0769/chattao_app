@@ -6,7 +6,6 @@ import 'package:chattao_app/messages.dart';
 import 'package:chattao_app/models/chat_message.dart';
 import 'package:chattao_app/sticker_gallery.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:chattao_app/constants.dart';
 import 'package:flutter/rendering.dart';
@@ -14,6 +13,8 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+// import 'package:flutter_native_image/flutter_native_image.dart';
 
 class ChatView extends StatelessWidget {
   final String peerId;
@@ -70,7 +71,7 @@ class ChatScreenState extends State<ChatScreen> {
   List<ChatMessage> _chatMessages = new List();
   List<ChatMessage> get chatMessages => _chatMessages;
 
-  var listMessage;
+  List<DocumentSnapshot> listMessage;
   String groupChatId;
   SharedPreferences prefs;
 
@@ -87,16 +88,14 @@ class ChatScreenState extends State<ChatScreen> {
   final ScrollController listScrollController = new ScrollController();
 
   final FocusNode focusNode = new FocusNode();
-  StreamSubscription<QuerySnapshot> subscription = null;
-
-  Offset drawStart = null;
+  StreamSubscription<QuerySnapshot> subscription;
 
   @override
   void initState() {
     super.initState();
     focusNode.addListener(onFocusChange);
     listScrollController.addListener(() {
-      if ((focusNode.hasFocus || isShowSticker) && 
+      if ((focusNode.hasFocus || isShowSticker) &&
           listScrollController.position.userScrollDirection ==
               ScrollDirection.reverse) {
         focusNode.unfocus();
@@ -104,6 +103,12 @@ class ChatScreenState extends State<ChatScreen> {
           showBottomSafeArea = true;
           isShowSticker = false;
         });
+      }
+    });
+
+    listScrollController.addListener(() {
+      if (listScrollController.position.outOfRange && !isLoading) {
+        _loadMore();
       }
     });
 
@@ -130,6 +135,25 @@ class ChatScreenState extends State<ChatScreen> {
     });
   }
 
+  _loadMore() async {
+    isLoading = true;
+    await Firestore.instance
+        .collection('messages')
+        .document(groupChatId)
+        .collection(groupChatId)
+        .orderBy('timestamp', descending: true)
+        .startAfter([listMessage.last.data['timestamp']])
+        .limit(20)
+        .getDocuments()
+        .then((queryResult) {
+          isLoading = false;
+          listMessage = queryResult.documents;
+          _updateLocalMessageList(queryResult, isAppend: true);
+        }, onError: () {
+          isLoading = true;
+        });
+  }
+
   _clearUnreadCount() {
     var chatListReference =
         Firestore.instance.collection('messages').document(groupChatId);
@@ -141,7 +165,7 @@ class ChatScreenState extends State<ChatScreen> {
             chatListReference,
             {
               'unread-$myId': 0,
-              'lastUpdated': DateTime.now().millisecondsSinceEpoch.toString(),
+              // 'lastUpdated': DateTime.now().millisecondsSinceEpoch.toString(),
             },
           );
         });
@@ -169,8 +193,9 @@ class ChatScreenState extends State<ChatScreen> {
     setState(() {});
   }
 
-  void _updateLocalMessageList(QuerySnapshot snapShot) {
-    if (_chatMessages == null || _chatMessages.length == 0) {
+  void _updateLocalMessageList(QuerySnapshot snapShot,
+      {bool isAppend = false}) {
+    if (_chatMessages == null || _chatMessages.length == 0 || isAppend) {
       snapShot.documents.forEach((document) {
         _chatMessages.add(new ChatMessage(
             content: document['content'],
@@ -244,6 +269,9 @@ class ChatScreenState extends State<ChatScreen> {
   Future getImage() async {
     File image = await ImagePicker.pickImage(source: ImageSource.gallery);
 
+    // File compressedFile = await FlutterNativeImage.compressImage(image.path,
+    //     quality: 50, percentage: 50);
+
     if (image != null) {
       var chatMsg = new ChatMessage(
           localImageFile: image,
@@ -252,7 +280,9 @@ class ChatScreenState extends State<ChatScreen> {
           idTo: peerId,
           timeStamp: DateTime.now().millisecondsSinceEpoch.toString(),
           type: 1);
-      chatMsg.syncToServer();
+      chatMsg.syncToServer().then((value) {
+        // compressedFile.delete();
+      });
       _chatMessages.insert(0, chatMsg);
       setState(() {
         _chatMessages = _chatMessages;
@@ -267,21 +297,6 @@ class ChatScreenState extends State<ChatScreen> {
       isShowSticker = true;
       showBottomSafeArea = true;
     });
-  }
-
-  Future uploadFile() async {
-    String fileName = DateTime.now().millisecondsSinceEpoch.toString();
-    StorageReference reference = FirebaseStorage.instance.ref().child(fileName);
-    StorageUploadTask uploadTask = reference.putFile(imageFile);
-
-    Uri downloadUrl = (await uploadTask.future).downloadUrl;
-    imageUrl = downloadUrl.toString();
-
-    setState(() {
-      isLoading = false;
-    });
-
-    onSendMessage(imageUrl, 1);
   }
 
   void onSendMessage(String content, int type) {
@@ -309,84 +324,25 @@ class ChatScreenState extends State<ChatScreen> {
   }
 
   Widget buildItem(int index, ChatMessage message) {
-    if (message.idFrom == myId) {
-      // Right (my message)
-      return Row(
-        children: <Widget>[
-          TextMessageContent(
-              message: message,
-              isLastMessageRight: isLastMessageRight(index),
-              highlight: true),
-          ImageMessageContent(
-            isLastMessageRight: isLastMessageRight(index),
-            message: message,
-          ),
-          StickerMessageContent(
-            message: message,
-            isLastMessageRight: isLastMessageRight(index),
-          ),
-          ChatAvatar(
-            avatarUrl: myAvatar,
-          )
-        ],
-        mainAxisAlignment: MainAxisAlignment.end,
-        crossAxisAlignment: CrossAxisAlignment.start,
-      );
-    } else {
-      // Left (peer message)
-      return Container(
-        child: Column(
-          children: <Widget>[
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                ChatAvatar(
-                  avatarUrl: peerAvatar,
-                ),
-                TextMessageContent(
-                    message: message,
-                    isLastMessageRight: isLastMessageRight(index),
-                    highlight: false),
-                ImageMessageContent(
-                  isLastMessageRight: isLastMessageRight(index),
-                  message: message,
-                ),
-                StickerMessageContent(
-                  message: message,
-                  isLastMessageRight: isLastMessageRight(index),
-                )
-              ],
-            ),
+    var isSelf = message.idFrom == myId;
+    var avartar = isSelf ? myAvatar : peerAvatar;
 
-            // Time
-            shouldShowTimeSplitter(index)
-                ? Center(
-                    child: Container(
-                      //  alignment: Alignment.center,
-                      padding: EdgeInsets.fromLTRB(12.0, 4.0, 12.0, 4.0),
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(5.0),
-                          color: Colors.grey.shade300),
-                      child: Text(
-                        DateFormat('dd MMM kk:mm').format(
-                            DateTime.fromMillisecondsSinceEpoch(
-                                int.parse(message.timeStamp))),
-                        style: TextStyle(
-                          color: Colors.black.withAlpha(200),
-                          fontSize: 10.0,
-                        ),
-                      ),
-                      margin:
-                          EdgeInsets.only(left: 50.0, top: 5.0, bottom: 5.0),
-                    ),
-                  )
-                : Container()
-          ],
-          crossAxisAlignment: CrossAxisAlignment.start,
-        ),
-        margin: EdgeInsets.only(bottom: 10.0),
-      );
-    }
+    return Container(
+      child: Column(
+        children: <Widget>[
+          shouldShowTimeSplitter(index) ? TimeSplitter(message) : Container(),
+          MessageItemView(
+            message,
+            avartar,
+            index,
+            isLastMessageRight,
+            isSelf: isSelf,
+          ),
+          // Time
+        ],
+      ),
+      margin: EdgeInsets.only(bottom: 10.0),
+    );
   }
 
   bool isTimeDiffBig(String timeStampMsgPre, String timeStampMsgNow) {
@@ -396,7 +352,7 @@ class ChatScreenState extends State<ChatScreen> {
 
     var timeDiff = stampNow - stampPre;
 
-    return timeDiff > 1 * 1000 * 20;
+    return timeDiff > 1 * 1000 * 60;
   }
 
   bool shouldShowTimeSplitter(int index) {
@@ -440,6 +396,7 @@ class ChatScreenState extends State<ChatScreen> {
         children: <Widget>[
           Column(
             children: <Widget>[
+              buildLoading(),
               // List of messages
               buildListMessage(),
               // Sticker
@@ -452,7 +409,6 @@ class ChatScreenState extends State<ChatScreen> {
           ),
 
           // Loading
-          buildLoading()
         ],
       ),
       onWillPop: onBackPress,
@@ -460,17 +416,17 @@ class ChatScreenState extends State<ChatScreen> {
   }
 
   Widget buildLoading() {
-    return Positioned(
-      child: isLoading
-          ? Container(
-              child: Center(
-                child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(themeColor)),
-              ),
-              color: Colors.white.withOpacity(0.8),
-            )
-          : Container(),
-    );
+    return isLoading
+        ? Container(
+            padding: EdgeInsets.all(8.0),
+            child: Center(
+              child: CircularProgressIndicator(
+                  backgroundColor: Colors.transparent,
+                  valueColor: AlwaysStoppedAnimation<Color>(themeColor)),
+            ),
+            // color: Colors.white.withOpacity(0.8),
+          )
+        : Container();
   }
 
   Widget buildInput() {
@@ -502,24 +458,24 @@ class ChatScreenState extends State<ChatScreen> {
               // Edit text
               Flexible(
                 child: Container(
-                  constraints:  BoxConstraints( maxHeight: 50.0),
+                  constraints: BoxConstraints(maxHeight: 50.0),
                   child: TextField(
-                      //  maxLines: 100,
-                       scrollPadding: EdgeInsets.all(4.0),
-                        
-                      style: TextStyle(color: primaryColor, fontSize: 15.0),
-                      controller: textEditingController,
-                      decoration: InputDecoration.collapsed(
-                        hintText: 'Type here...',
-                        hintStyle: TextStyle(color: greyColor),
-                      ),
-                      focusNode: focusNode,
-                      textInputAction: TextInputAction.send,
-                      onSubmitted: (String content) {
-                        onSendMessage(content, 0);
-                        FocusScope.of(context).requestFocus(focusNode);
-                      },
+                    //  maxLines: 100,
+                    scrollPadding: EdgeInsets.all(4.0),
+
+                    style: TextStyle(color: primaryColor, fontSize: 15.0),
+                    controller: textEditingController,
+                    decoration: InputDecoration.collapsed(
+                      hintText: 'Type here...',
+                      hintStyle: TextStyle(color: greyColor),
                     ),
+                    focusNode: focusNode,
+                    textInputAction: TextInputAction.send,
+                    onSubmitted: (String content) {
+                      onSendMessage(content, 0);
+                      FocusScope.of(context).requestFocus(focusNode);
+                    },
+                  ),
                 ),
               ),
 
@@ -571,31 +527,92 @@ class ChatScreenState extends State<ChatScreen> {
                         showBottomSafeArea = true;
                       });
                     },
-                    onVerticalDragDown: (details) {
-                      drawStart = details.globalPosition;
-                    },
-                    onVerticalDragUpdate: (details) {
-                      var currentPos = details.globalPosition;
-                      var diff = currentPos - drawStart;
-                      if (focusNode.hasFocus && diff.dx < 5) {
-                        focusNode.unfocus();
-                      }
-                    },
-                    onVerticalDragEnd: (details) {
-                      drawStart = null;
-                    },
-                    child: ListView.builder(
-                      padding: EdgeInsets.all(10.0),
-                      itemBuilder: (context, index) =>
-                          buildItem(index, _chatMessages[index]),
-                      itemCount: _chatMessages.length,
-                      reverse: true,
-                      controller: listScrollController,
+                    child: Scrollbar(
+                      child: ListView.builder(
+                        padding: EdgeInsets.all(10.0),
+                        itemBuilder: (context, index) =>
+                            buildItem(index, _chatMessages[index]),
+                        itemCount: _chatMessages.length,
+                        reverse: true,
+                        controller: listScrollController,
+                        physics: const AlwaysScrollableScrollPhysics(),
+                      ),
                     ),
                   );
                 }
               },
             ),
+    );
+  }
+}
+
+class MessageItemView extends StatelessWidget {
+  final ChatMessage message;
+  final String avatarUrl;
+  final int index;
+  final Function(int) isLastMessageRight;
+  final bool isSelf;
+
+  MessageItemView(
+      this.message, this.avatarUrl, this.index, this.isLastMessageRight,
+      {this.isSelf = false});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment:
+          isSelf ? MainAxisAlignment.end : MainAxisAlignment.start,
+      children: <Widget>[
+        isSelf
+            ? Container()
+            : ChatAvatar(
+                avatarUrl: avatarUrl,
+              ),
+        TextMessageContent(
+            message: message,
+            isLastMessageRight: isLastMessageRight(index),
+            highlight: isSelf),
+        ImageMessageContent(
+          isLastMessageRight: isLastMessageRight(index),
+          message: message,
+        ),
+        StickerMessageContent(
+          message: message,
+          isLastMessageRight: isLastMessageRight(index),
+        ),
+        isSelf
+            ? ChatAvatar(
+                avatarUrl: avatarUrl,
+              )
+            : Container(),
+      ],
+    );
+  }
+}
+
+class TimeSplitter extends StatelessWidget {
+  final ChatMessage message;
+  TimeSplitter(this.message);
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Container(
+        //  alignment: Alignment.center,
+        padding: EdgeInsets.fromLTRB(16.0, 4.0, 16.0, 4.0),
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(5.0),
+            color: Colors.grey.shade300),
+        child: Text(
+          DateFormat('dd MMM kk:mm').format(DateTime.fromMillisecondsSinceEpoch(
+              int.parse(message.timeStamp))),
+          style: TextStyle(
+            color: Colors.black.withAlpha(200),
+            fontSize: 10.0,
+          ),
+        ),
+        margin: EdgeInsets.only(left: 5.0, top: 5.0, bottom: 12.0),
+      ),
     );
   }
 }

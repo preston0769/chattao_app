@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:chattao_app/common.dart';
 import 'package:chattao_app/constants.dart';
+import 'package:chattao_app/login.dart';
 import 'package:chattao_app/messages.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -71,13 +72,14 @@ class _ProfilePageState extends State<ProfilePage> {
   _handleLogout(BuildContext context) async {
     final GoogleSignIn googleSignIn = new GoogleSignIn();
     final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
-    final SharedPreferences prefs = await SharedPreferences.getInstance(); 
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
 
     await googleSignIn.signOut();
     await firebaseAuth.signOut();
     await prefs.clear();
     Navigator.popUntil(
         context, ModalRoute.withName(Navigator.defaultRouteName));
+    Navigator.push(context, new ScaleRoute(widget: LoginPage()));
   }
 
   @override
@@ -107,7 +109,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           ClipRRect(
                             borderRadius: BorderRadius.circular(8.0),
                             child: ChatAvatar(
-                              avatarUrl: myAvatar.length>0? myAvatar:null,
+                              avatarUrl: myAvatar.length > 0 ? myAvatar : null,
                               widgetHeight: 64.0,
                             ),
                           ),
@@ -136,7 +138,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         ],
                       ),
                     ),
-                    SettingItem("About", subTitle: "Version 0.0.2"),
+                    SettingItem("About", subTitle: "Version 0.1.0"),
                     SettingItem("Notifictions"),
                     Expanded(
                       child: Container(),
