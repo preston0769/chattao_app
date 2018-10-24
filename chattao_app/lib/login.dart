@@ -7,6 +7,7 @@ import 'package:chattao_app/models/chat.dart';
 import 'package:chattao_app/smsLogin.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -44,12 +45,9 @@ class _LoginPageState extends State<LoginPage> {
       var reduxStore = StoreProvider.of<AppState>(context);
       reduxStore.dispatch(UserLogined(me));
       // _dismissLoader(context);
-      if (reduxStore.state.targetPeerId == null ||
-          reduxStore.state.targetPeerId.isEmpty) {
-        Navigator.push(context, MaterialPageRoute(builder: (context) {
-          return new ChatListPage();
-        }));
-      }
+      Navigator.push(context, MaterialPageRoute(builder: (context) {
+        return new ChatListPage();
+      }));
     } else {
       // _dismissLoader(context);
       setState(() {
@@ -75,10 +73,12 @@ class _LoginPageState extends State<LoginPage> {
     Navigator.of(context, rootNavigator: true).pop();
   }
 
-  Future AddDeviceTokenIfNotExists(
+  Future addDeviceTokenIfNotExists(
       FirebaseUser firebaseUser, BuildContext context) async {
     var reduxStore = StoreProvider.of<AppState>(context);
     var token = reduxStore.state.pushNotificationToken;
+
+    if (token == null) token = await FirebaseMessaging().getToken();
 
     final QuerySnapshot result = await Firestore.instance
         .collection('devicetokens')
@@ -129,7 +129,7 @@ class _LoginPageState extends State<LoginPage> {
 
       await _addUserToDBIfNotExists(firebaseUser);
 
-      await AddDeviceTokenIfNotExists(firebaseUser, context);
+      await addDeviceTokenIfNotExists(firebaseUser, context);
 
       User me = new User(firebaseUser.uid);
       me.avataURL = firebaseUser.photoUrl;

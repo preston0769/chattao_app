@@ -107,7 +107,9 @@ class ChatScreenState extends State<ChatScreen> {
     });
 
     listScrollController.addListener(() {
-      if (listScrollController.position.outOfRange && !isLoading) {
+      if(listScrollController.position.pixels> (listScrollController.position.maxScrollExtent + 10.0)&& !isLoading)
+      // if (listScrollController.position.outOfRange && !isLoading) 
+      {
         _loadMore();
       }
     });
@@ -150,7 +152,9 @@ class ChatScreenState extends State<ChatScreen> {
           listMessage = queryResult.documents;
           _updateLocalMessageList(queryResult, isAppend: true);
         }, onError: () {
-          isLoading = true;
+          isLoading = false;
+        }).catchError((error){
+          isLoading = false;
         });
   }
 
@@ -352,7 +356,7 @@ class ChatScreenState extends State<ChatScreen> {
 
     var timeDiff = stampNow - stampPre;
 
-    return timeDiff > 1 * 1000 * 60;
+    return timeDiff > 2 * 1000 * 60;
   }
 
   bool shouldShowTimeSplitter(int index) {
@@ -436,6 +440,7 @@ class ChatScreenState extends State<ChatScreen> {
         bottom: showBottomSafeArea,
         child: Container(
           child: Row(
+            // crossAxisAlignment: CrossAxisAlignment.end,
             children: <Widget>[
               // Button send image
               new Container(
@@ -459,22 +464,33 @@ class ChatScreenState extends State<ChatScreen> {
               Flexible(
                 child: Container(
                   constraints: BoxConstraints(maxHeight: 50.0),
-                  child: TextField(
-                    //  maxLines: 100,
-                    scrollPadding: EdgeInsets.all(4.0),
-
-                    style: TextStyle(color: primaryColor, fontSize: 15.0),
-                    controller: textEditingController,
-                    decoration: InputDecoration.collapsed(
-                      hintText: 'Type here...',
-                      hintStyle: TextStyle(color: greyColor),
+                  child: Container(
+                    color: Color(0xFFEFEFEF),
+                    child: Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: TextField(
+                        // maxLines: null,
+                        // keyboardType: TextInputType.multiline,
+                        scrollPadding: EdgeInsets.all(4.0),
+                        style: TextStyle(
+                          color: primaryColor,
+                          fontSize: 15.0,
+                        ),
+                        controller: textEditingController,
+                        decoration: InputDecoration.collapsed(
+                          hintText: 'Type here...',
+                          hintStyle: TextStyle(
+                            color: greyColor,
+                          ),
+                        ),
+                        focusNode: focusNode,
+                        textInputAction: TextInputAction.send,
+                        onSubmitted: (String content) {
+                          onSendMessage(content, 0);
+                          FocusScope.of(context).requestFocus(focusNode);
+                        },
+                      ),
                     ),
-                    focusNode: focusNode,
-                    textInputAction: TextInputAction.send,
-                    onSubmitted: (String content) {
-                      onSendMessage(content, 0);
-                      FocusScope.of(context).requestFocus(focusNode);
-                    },
                   ),
                 ),
               ),

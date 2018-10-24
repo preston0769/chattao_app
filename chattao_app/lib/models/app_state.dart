@@ -4,7 +4,7 @@ import 'package:chattao_app/models/chat.dart';
 class AppState{
   final List<Chat> chats;
   final List<User> friends;
-  final bool logined;
+  bool logined;
   bool listenerRegistered = false;
   String targetPeerId;
   User me;

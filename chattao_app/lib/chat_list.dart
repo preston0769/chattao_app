@@ -20,18 +20,58 @@ class _ChatListPageState extends State<ChatListPage> {
   String uid;
   bool initialized = false;
   SharedPreferences prefs;
+  StreamSubscription onceOffSub;
 
   Future readLocal() async {
     var prefs = await SharedPreferences.getInstance();
     uid = prefs.getString('id') ?? 'uid-xxxx';
+
     setState(() {
       initialized = true;
     });
   }
 
+  void _handleJumpOver() {
+    var reduxStore = StoreProvider.of<AppState>(context);
+    onceOffSub.cancel();
+    onceOffSub = null;
+    User peer = reduxStore.state.friends
+        .where((friend) =>
+            friend.uid == reduxStore.state.targetPeerId.trim().toString())
+        .first;
+
+    var newRoute = new ScaleRoute(
+        widget: new ChatView(
+      peerId: peer.uid,
+      peerName: peer.name,
+      peerAvatar: peer.avataURL,
+    ));
+
+    reduxStore.dispatch(ClearJumpToPeerAction());
+    if (reduxStore.state.currentRouteName != "/chatView") {
+      Navigator.push(context, newRoute);
+      reduxStore.dispatch(UpdateRouteNameAction("/chatView"));
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      var reduxStore = StoreProvider.of<AppState>(context);
+
+      if (reduxStore.state.targetPeerId == null ||
+          reduxStore.state.targetPeerId.isEmpty) return;
+
+      if (reduxStore.state.friends.length < 1) {
+        onceOffSub = reduxStore.onChange.listen((state) {
+          if (state.friends.length > 1) {
+            _handleJumpOver();
+          }
+        });
+      } else
+        _handleJumpOver();
+    });
     readLocal();
   }
 
@@ -83,15 +123,15 @@ class _ChatListPageState extends State<ChatListPage> {
                             });
                       }),
                     ),
-                    // StoreConnector<AppState, String>(
-                    //   converter: (store) {
-                    //     return store.state.message;
-                    //   },
-                    //   builder: (context, content) {
-                    //     return Center(
-                    //         child: new Text(content ?? "Nothing is here"));
-                    //   },
-                    // ),
+                    StoreConnector<AppState, String>(
+                      converter: (store) {
+                        return store.state.message;
+                      },
+                      builder: (context, content) {
+                        return Center(
+                            child: new Text(content ?? "Nothing is here"));
+                      },
+                    ),
                   ],
                 ),
               ),
@@ -120,6 +160,11 @@ class ChatListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var lastMsg = chat.latestMsg?.content ?? "--";
+    if (lastMsg.length > 24) {
+      lastMsg = lastMsg.substring(0, 20) + "...";
+    }
+
     return new ListTile(
         key: new ValueKey(chat.hashCode),
         title: new Container(
@@ -193,7 +238,7 @@ class ChatListItem extends StatelessWidget {
                       padding: EdgeInsets.only(top: 8.0),
                       child: chat.latestMsg != null
                           ? new Text(
-                              chat.latestMsg.content,
+                              lastMsg,
                               style:
                                   TextStyle(color: Colors.grey, fontSize: 12.0),
                             )
@@ -201,6 +246,9 @@ class ChatListItem extends StatelessWidget {
                     )
                   ],
                 ),
+              ),
+              new SizedBox(
+                width: 40.0,
               ),
               new Text(
                 chat.latestMsg != null
