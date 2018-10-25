@@ -60,52 +60,6 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     _configFireBaseMessage();
     WidgetsBinding.instance.addObserver(this);
     activeScreen = LoginPage();
-    _loadLocalActiveMessage();
-  }
-
-  void _loadLocalActiveMessage() async {
-    reduxStore.dispatch(StartLoadActiveChatAction());
-    List<Chat> chatList = await readChatList();
-    if (chatList != null && chatList.length > 0)
-      reduxStore.dispatch(LoadActiveChatsFinishedAction(chatList));
-  }
-
-  void _listenToChatListChange(User me) async {
-    Firestore.instance
-        .collection('messages')
-        .where('uids', arrayContains: me.uid)
-        .snapshots()
-        .listen((snapshot) {
-      List<Chat> chats = new List();
-      List<User> users = reduxStore.state.friends;
-
-      snapshot.documents.forEach((document) {
-        List<String> uids =
-            List<String>.from((document['uids'] as List<dynamic>));
-
-        String peerId = uids.where((uid) => uid != me.uid).first;
-
-        if (peerId != null || peerId.isNotEmpty) {
-          User peer = users.where((user) => user.uid == peerId).first;
-
-          Chat chat = new Chat(me, peer);
-
-          chat.lastUpdated = DateTime.fromMillisecondsSinceEpoch(
-              int.parse(document['lastUpdated']));
-          chat.unreadMessage = document['unread-${chat.me.uid}'];
-          ChatMessage lastmsg = new ChatMessage(
-              idFrom: peer.uid,
-              idTo: me.uid,
-              timeStamp: document['lastUpdated'],
-              content: document['lastmsg'],
-              type: -1);
-          chat.latestMsg = lastmsg;
-          chats.add(chat);
-        }
-      });
-
-      reduxStore.dispatch(UpdateChatList(chats));
-    });
   }
 
   Future _getAllFriends(User me) async {
@@ -228,7 +182,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     if (!state.listenerRegistered && state.logined) {
       reduxStore.dispatch(CloudListenerRegistered());
       await _getAllFriends(state.me);
-      _listenToChatListChange(state.me);
+      // _listenToChatListChange(state.me);
     }
   }
 }

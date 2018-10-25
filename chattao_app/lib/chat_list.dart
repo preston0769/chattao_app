@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:chattao_app/actions/app_actions.dart';
 import 'package:chattao_app/chats.dart';
 import 'package:chattao_app/common.dart';
+import 'package:chattao_app/controllers/chat_list_controller.dart';
 import 'package:chattao_app/models/app_state.dart';
 import 'package:chattao_app/models/chat.dart';
 import 'package:flutter/material.dart';
@@ -57,8 +58,14 @@ class _ChatListPageState extends State<ChatListPage> {
   @override
   void initState() {
     super.initState();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       var reduxStore = StoreProvider.of<AppState>(context);
+      var controller = new ChatListController(reduxStore);
+      controller.readFromLocal().then((_) {
+        controller.streamFromServer();
+        setState(() {});
+      });
 
       if (reduxStore.state.targetPeerId == null ||
           reduxStore.state.targetPeerId.isEmpty) return;
@@ -123,15 +130,15 @@ class _ChatListPageState extends State<ChatListPage> {
                             });
                       }),
                     ),
-                    StoreConnector<AppState, String>(
-                      converter: (store) {
-                        return store.state.message;
-                      },
-                      builder: (context, content) {
-                        return Center(
-                            child: new Text(content ?? "Nothing is here"));
-                      },
-                    ),
+                    // StoreConnector<AppState, String>(
+                    //   converter: (store) {
+                    //     return store.state.message;
+                    //   },
+                    //   builder: (context, content) {
+                    //     return Center(
+                    //         child: new Text(content ?? "Nothing is here"));
+                    //   },
+                    // ),
                   ],
                 ),
               ),

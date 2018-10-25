@@ -42,9 +42,9 @@ class UpdateFriends{
    UpdateFriends(this.friends);
 }
 
-class UpdateChatList{
+class UpdateChatListAction{
   final List<Chat> chats;
-  UpdateChatList(this.chats);
+  UpdateChatListAction(this.chats);
 }
 
 class SetJumpToPeerAction{
@@ -59,3 +59,11 @@ class UpdateRouteNameAction{
    UpdateRouteNameAction(this.routeName);
 }
 
+class SendNewMessageAction{
+  final User me;
+  final User peer;
+  final ChatMessage message;
+
+   SendNewMessageAction(this.me,this.peer,this.message);
+
+}

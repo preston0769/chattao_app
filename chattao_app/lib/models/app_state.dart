@@ -1,4 +1,5 @@
 
+import 'package:chattao_app/controllers/chat_list_controller.dart';
 import 'package:chattao_app/models/chat.dart';
 
 class AppState{
@@ -12,6 +13,9 @@ class AppState{
   String message = "--";
   String pushNotificationToken;
   String currentRouteName = "route";
+  
+  ChatListController chatListCtrler;
+
 
   AppState(this.chats, this.friends, this.logined);
 

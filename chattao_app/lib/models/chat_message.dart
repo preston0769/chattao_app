@@ -38,6 +38,32 @@ class ChatMessage {
       chatId = '$idTo-$idFrom';
     }
   }
+
+  ChatMessage.fromJson(Map<String, dynamic> json)
+      : type = json['type'],
+        content = json['content'],
+        idFrom = json['idFrom'],
+        idTo = json['idTo'],
+        timeStamp = json['timeStamp'],
+        documentId = json['documentId'],
+        localImageFile = null {
+    synced = json['synced'];
+    syncing = json['syncing'];
+    syncFailed = json['syncFailed'];
+  }
+
+  Map<String, dynamic> toJson() => {
+        'chatId': chatId,
+        'content': content,
+        'documentId': documentId,
+        'idFrom': idFrom,
+        'idTo': idTo,
+        'timeStamp': timeStamp,
+        'synced': synced,
+        'syncing': syncing,
+        'syncFailed': syncFailed,
+      };
+
   Future<String> _uploadFile() async {
     String fileName = DateTime.now().millisecondsSinceEpoch.toString();
     serverFileName = fileName;
@@ -83,31 +109,32 @@ class ChatMessage {
           .collection(chatId)
           .document(DateTime.now().millisecondsSinceEpoch.toString());
 
-      var chatListReference =
-          Firestore.instance.collection('messages').document(chatId);
-      var contentShort = type==1?"[Image]":type==2?"[Sticker]":content;
-      chatListReference.get().then((message) {
-        if (message.data.length>0) {
-          Firestore.instance.runTransaction((transaction) async {
-            await transaction.update(
-              chatListReference,
-              {
-                'lastmsg':contentShort,
-                'unread-$idTo': message['unread-$idTo']+1,
-                'lastUpdated': this.timeStamp,
-              },
-            );
-          });
-        } else {
-          chatListReference.setData({
-            'uids': [idFrom, idTo],
-            'lastUpdated': DateTime.now().millisecondsSinceEpoch.toString(),
-            'unread-$idFrom': 0,
-            'unread-$idTo':1 ,
-            'lastmsg':contentShort,
-          });
-        }
-      });
+      // var chatListReference =
+      //     Firestore.instance.collection('messages').document(chatId);
+      // var contentShort =
+      //     type == 1 ? "[Image]" : type == 2 ? "[Sticker]" : content;
+      // chatListReference.get().then((message) {
+      //   if (message.data.length > 0) {
+      //     Firestore.instance.runTransaction((transaction) async {
+      //       await transaction.update(
+      //         chatListReference,
+      //         {
+      //           'lastmsg': contentShort,
+      //           'unread-$idTo': message['unread-$idTo'] + 1,
+      //           'lastUpdated': this.timeStamp,
+      //         },
+      //       );
+      //     });
+      //   } else {
+      //     chatListReference.setData({
+      //       'uids': [idFrom, idTo],
+      //       'lastUpdated': DateTime.now().millisecondsSinceEpoch.toString(),
+      //       'unread-$idFrom': 0,
+      //       'unread-$idTo': 1,
+      //       'lastmsg': contentShort,
+      //     });
+      //   }
+      // });
 
       Firestore.instance.runTransaction((transaction) async {
         await transaction.set(

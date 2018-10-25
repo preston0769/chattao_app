@@ -51,7 +51,7 @@ AppState appReducer(AppState state, action) {
     return state;
   }
 
-  if (action is UpdateChatList) {
+  if (action is UpdateChatListAction) {
     state.chats.clear();
     state.chats.addAll(action.chats);
     state.initState = InitState.Inited;
@@ -64,6 +64,11 @@ AppState appReducer(AppState state, action) {
   }
   if (action is ClearJumpToPeerAction) {
     state.targetPeerId = "";
+    return state;
+  }
+
+  if(action is SendNewMessageAction){
+    state.chatListCtrler.updateChatList(action.peer, action.message);
     return state;
   }
 

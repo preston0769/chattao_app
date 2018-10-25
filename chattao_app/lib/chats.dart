@@ -1,17 +1,22 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:chattao_app/actions/app_actions.dart';
 import 'package:chattao_app/keys/global_keys.dart';
 import 'package:chattao_app/messages.dart';
+import 'package:chattao_app/models/app_state.dart';
+import 'package:chattao_app/models/chat.dart';
 import 'package:chattao_app/models/chat_message.dart';
 import 'package:chattao_app/sticker_gallery.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:chattao_app/constants.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_redux/flutter_redux.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:redux/redux.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // import 'package:flutter_native_image/flutter_native_image.dart';
@@ -39,21 +44,31 @@ class ChatView extends StatelessWidget {
         ),
         centerTitle: true,
       ),
-      body: new ChatScreen(
-        key: chatScreenKey,
-        peerId: peerId,
-        peerAvatar: peerAvatar,
+      body: StoreConnector<AppState, User>(
+        converter: (store) {
+          return store.state.friends.where((f) => f.uid == peerId).first;
+        },
+        builder: (context, user) => new ChatScreen(
+              user,
+              key: chatScreenKey,
+            ),
       ),
     );
   }
 }
 
 class ChatScreen extends StatefulWidget {
-  final String peerId;
-  final String peerAvatar;
+  final User peer;
+  String peerId;
+  String peerAvatar;
 
-  ChatScreen({Key key, @required this.peerId, @required this.peerAvatar})
-      : super(key: key);
+  ChatScreen(
+    this.peer, {
+    Key key,
+  }) : super(key: key) {
+    peerId = peer.uid;
+    peerAvatar = peer.avataURL;
+  }
 
   @override
   State createState() =>
@@ -61,7 +76,10 @@ class ChatScreen extends StatefulWidget {
 }
 
 class ChatScreenState extends State<ChatScreen> {
-  ChatScreenState({Key key, @required this.peerId, @required this.peerAvatar});
+  ChatScreenState(
+      {Key key, @required this.peerId, @required this.peerAvatar}) {}
+
+  Store<AppState> reduxStore;
 
   String peerId;
   String peerAvatar;
@@ -93,6 +111,7 @@ class ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
+
     focusNode.addListener(onFocusChange);
     listScrollController.addListener(() {
       if ((focusNode.hasFocus || isShowSticker) &&
@@ -107,11 +126,17 @@ class ChatScreenState extends State<ChatScreen> {
     });
 
     listScrollController.addListener(() {
-      if(listScrollController.position.pixels> (listScrollController.position.maxScrollExtent + 10.0)&& !isLoading)
-      // if (listScrollController.position.outOfRange && !isLoading) 
+      if (listScrollController.position.pixels >
+              (listScrollController.position.maxScrollExtent + 10.0) &&
+          !isLoading)
+      // if (listScrollController.position.outOfRange && !isLoading)
       {
         _loadMore();
       }
+    });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      reduxStore = StoreProvider.of<AppState>(context);
     });
 
     groupChatId = '';
@@ -153,7 +178,8 @@ class ChatScreenState extends State<ChatScreen> {
           _updateLocalMessageList(queryResult, isAppend: true);
         }, onError: () {
           isLoading = false;
-        }).catchError((error){
+        })
+        .catchError((error) {
           isLoading = false;
         });
   }
@@ -288,6 +314,8 @@ class ChatScreenState extends State<ChatScreen> {
         // compressedFile.delete();
       });
       _chatMessages.insert(0, chatMsg);
+      reduxStore.dispatch(SendNewMessageAction(null, widget.peer, chatMsg));
+
       setState(() {
         _chatMessages = _chatMessages;
       });
@@ -317,6 +345,7 @@ class ChatScreenState extends State<ChatScreen> {
 
       chatmsg.syncToServer();
       _chatMessages.insert(0, chatmsg);
+      reduxStore.dispatch(SendNewMessageAction(null, widget.peer, chatmsg));
       setState(() {
         // _chatMessages = _chatMessages;
       });
