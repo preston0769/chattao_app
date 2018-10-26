@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:chattao_app/actions/app_actions.dart';
 import 'package:chattao_app/keys/global_keys.dart';
@@ -16,10 +17,10 @@ import 'package:flutter_redux/flutter_redux.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:redux/redux.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-// import 'package:flutter_native_image/flutter_native_image.dart';
+import 'package:flutter_native_image/flutter_native_image.dart';
 
 class ChatView extends StatelessWidget {
   final String peerId;
@@ -137,6 +138,9 @@ class ChatScreenState extends State<ChatScreen> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       reduxStore = StoreProvider.of<AppState>(context);
+      setState(() {
+        initialized = true;
+      });
     });
 
     groupChatId = '';
@@ -189,7 +193,15 @@ class ChatScreenState extends State<ChatScreen> {
         Firestore.instance.collection('messages').document(groupChatId);
 
     chatListReference.get().then((message) {
-      if (message.data.length > 0) {
+      if (message.data == null) {
+        chatListReference.setData({
+          'uids': [peerId, myId],
+          'lastUpdated': DateTime.now().millisecondsSinceEpoch.toString(),
+          'unread-$peerId': 0,
+          'unread-$myId': 0,
+          'lastmsg': "",
+        });
+      } else if (message.data.length > 0) {
         Firestore.instance.runTransaction((transaction) async {
           await transaction.update(
             chatListReference,
@@ -299,19 +311,32 @@ class ChatScreenState extends State<ChatScreen> {
   Future getImage() async {
     File image = await ImagePicker.pickImage(source: ImageSource.gallery);
 
-    // File compressedFile = await FlutterNativeImage.compressImage(image.path,
-    //     quality: 50, percentage: 50);
+    File compressedFile = await FlutterNativeImage.compressImage(
+      image.path,
+      quality: 50,
+      percentage: 30,
+    );
 
+    // final tempDir = await getTemporaryDirectory();
+    // final path = tempDir.path;
+    // int rand = new Random().nextInt(10000);
+
+    // Im.Image fullsizeImg = Im.decodeImage(image.readAsBytesSync());
+    // Im.Image smallerImage = Im.copyResize(fullsizeImg,
+    //     400); // choose the size here, it will maintain aspect ratio
+
+    // var compressedImage = new File('$path/img_$rand.jpg')
+    //   ..writeAsBytesSync(Im.encodeJpg(smallerImage, quality: 60));
     if (image != null) {
       var chatMsg = new ChatMessage(
-          localImageFile: image,
+          localImageFile: compressedFile,
           content: "",
           idFrom: myId,
           idTo: peerId,
           timeStamp: DateTime.now().millisecondsSinceEpoch.toString(),
           type: 1);
       chatMsg.syncToServer().then((value) {
-        // compressedFile.delete();
+        compressedFile.delete();
       });
       _chatMessages.insert(0, chatMsg);
       reduxStore.dispatch(SendNewMessageAction(null, widget.peer, chatMsg));

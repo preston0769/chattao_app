@@ -118,14 +118,29 @@ class _ProfilePageState extends State<ProfilePage> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: <Widget>[
-                                Padding(
-                                  padding: const EdgeInsets.only(bottom: 8.0),
-                                  child: Text(
-                                    name,
-                                    style: TextStyle(
-                                        fontSize: 20.0,
-                                        fontWeight: FontWeight.w600),
-                                  ),
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: <Widget>[
+                                    Padding(
+                                      padding:
+                                          const EdgeInsets.only(bottom: 8.0),
+                                      child: Text(
+                                        name,
+                                        style: TextStyle(
+                                            fontSize: 20.0,
+                                            fontWeight: FontWeight.w600),
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.only(left: 8.0),
+                                      child: InkWell(
+                                          onTap: () {},
+                                          child: Icon(
+                                            Icons.edit,
+                                            color: themeColor,
+                                          )),
+                                    )
+                                  ],
                                 ),
                                 Text(uid.substring(uid.length - 10)),
                               ],
@@ -165,7 +180,7 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               bottomNavigationBar: BottomBar(
                 context: context,
-                activeIndex: 4,
+                activeIndex: 3,
               ),
             ),
       onWillPop: () {

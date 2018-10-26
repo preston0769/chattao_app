@@ -28,8 +28,12 @@ dependencies:
   firebase_messaging: ^2.0.2
   flutter_redux: ^0.5.2
   redux: ^3.0.0
+  # image: ^2.0.4
   flutter_native_image:
     git: https://github.com/btastic/flutter_native_image.git
+
+
+
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -55,15 +59,35 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
      - images/img_not_available.jpeg
-     - images/mimi1.gif
-     - images/mimi2.gif
-     - images/mimi3.gif
-     - images/mimi4.gif
-     - images/mimi5.gif
-     - images/mimi6.gif
-     - images/mimi7.gif
-     - images/mimi8.gif
-     - images/mimi9.gif
+     - images/gifs/mimi/mimi1.gif
+     - images/gifs/mimi/mimi2.gif
+     - images/gifs/mimi/mimi3.gif
+     - images/gifs/mimi/mimi4.gif
+     - images/gifs/mimi/mimi5.gif
+     - images/gifs/mimi/mimi6.gif
+     - images/gifs/mimi/mimi7.gif
+     - images/gifs/mimi/mimi8.gif
+     - images/gifs/mimi/mimi9.gif
+
+     - images/gifs/doubi/doubi1.gif
+     - images/gifs/doubi/doubi2.gif
+     - images/gifs/doubi/doubi3.gif
+     - images/gifs/doubi/doubi4.gif
+     - images/gifs/doubi/doubi5.gif
+     - images/gifs/doubi/doubi6.gif
+     - images/gifs/doubi/doubi7.gif
+     - images/gifs/doubi/doubi8.gif
+     - images/gifs/doubi/doubi9.gif
+
+     - images/gifs/miao/miao1.gif
+     - images/gifs/miao/miao2.gif
+     - images/gifs/miao/miao3.gif
+     - images/gifs/miao/miao4.gif
+     - images/gifs/miao/miao5.gif
+     - images/gifs/miao/miao6.gif
+     - images/gifs/miao/miao7.gif
+     - images/gifs/miao/miao8.gif
+     - images/gifs/miao/miao9.gif
 
   #  - images/a_dot_burr.jpeg
   #  - images/a_dot_ham.jpeg

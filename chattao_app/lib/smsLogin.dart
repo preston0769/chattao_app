@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:chattao_app/actions/app_actions.dart';
 import 'package:chattao_app/chat_list.dart';
+import 'package:chattao_app/common.dart';
 import 'package:chattao_app/constants.dart';
 import 'package:chattao_app/keys/global_keys.dart';
 import 'package:chattao_app/main.dart';
@@ -116,8 +117,7 @@ class _SMSLoginPageState extends State<SMSLoginPage> {
     Store<AppState> reduxStore = StoreProvider.of<AppState>(context);
 
     var token = reduxStore.state.pushNotificationToken;
-    if(token == null)
-        token = await FirebaseMessaging().getToken();
+    if (token == null) token = await FirebaseMessaging().getToken();
     final QuerySnapshot result = await Firestore.instance
         .collection('devicetokens')
         .where('uid', isEqualTo: firebaseUser.uid)
@@ -196,9 +196,7 @@ class _SMSLoginPageState extends State<SMSLoginPage> {
     await _signInWithPhoneNum(code);
 
     _dismissLoader(context);
-    Navigator.push(context, MaterialPageRoute(builder: (context) {
-      return new ChatListPage();
-    }));
+    Navigator.push(context, ScaleRoute(widget: new ChatListPage()));
   }
 
   void _changeToScreen(int index) {

@@ -130,7 +130,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: "570cafee663b360c27be9a002d15bda020332f5b"
+      resolved-ref: d6ef3cfb831cfdd3d2cea9e7e8771da983efca25
       url: "https://github.com/btastic/flutter_native_image.git"
     source: git
     version: "0.0.3"

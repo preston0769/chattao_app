@@ -109,33 +109,6 @@ class ChatMessage {
           .collection(chatId)
           .document(DateTime.now().millisecondsSinceEpoch.toString());
 
-      // var chatListReference =
-      //     Firestore.instance.collection('messages').document(chatId);
-      // var contentShort =
-      //     type == 1 ? "[Image]" : type == 2 ? "[Sticker]" : content;
-      // chatListReference.get().then((message) {
-      //   if (message.data.length > 0) {
-      //     Firestore.instance.runTransaction((transaction) async {
-      //       await transaction.update(
-      //         chatListReference,
-      //         {
-      //           'lastmsg': contentShort,
-      //           'unread-$idTo': message['unread-$idTo'] + 1,
-      //           'lastUpdated': this.timeStamp,
-      //         },
-      //       );
-      //     });
-      //   } else {
-      //     chatListReference.setData({
-      //       'uids': [idFrom, idTo],
-      //       'lastUpdated': DateTime.now().millisecondsSinceEpoch.toString(),
-      //       'unread-$idFrom': 0,
-      //       'unread-$idTo': 1,
-      //       'lastmsg': contentShort,
-      //     });
-      //   }
-      // });
-
       Firestore.instance.runTransaction((transaction) async {
         await transaction.set(
           documentReference,

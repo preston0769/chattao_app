@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chattao_app/constants.dart';
 import 'package:chattao_app/models/app_state.dart';
 import 'package:chattao_app/models/chat_message.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 
@@ -26,12 +27,12 @@ class ImageMessageContent extends StatelessWidget {
                   children: <Widget>[
                     message.syncing
                         ? Container(
-                            padding: EdgeInsets.all(5.0),
-                            height: 20.0,
-                            width: 20.0,
-                            child: CircularProgressIndicator(
-                                valueColor:
-                                    AlwaysStoppedAnimation<Color>(themeColor)),
+                            height: 16.0,
+                            width: 16.0,
+                            child: CupertinoActivityIndicator(
+                              animating: true,
+                              radius: 8.0,
+                            ),
                           )
                         : Container(),
                     Image.file(
@@ -130,8 +131,7 @@ class BaseMessageView extends StatelessWidget {
     return GestureDetector(
         onLongPress: () {
           var me = StoreProvider.of<AppState>(context).state.me;
-          if(me.uid != message.idFrom)
-           return;
+          if (me.uid != message.idFrom) return;
           _handleDelete(context);
         },
         child: child);
@@ -180,15 +180,21 @@ class StickerMessageContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (message.type != 2) return Container();
+    var localUrl = message.content;
+    if (!localUrl.contains("gifs"))
+      localUrl = "gifs/" +
+          localUrl.substring(0, localUrl.length - 1).toString() +
+          "/" +
+          localUrl;
     return BaseMessageView(
       message: message,
       child: Container(
         child: new Image.asset(
-          'images/${message.content}.gif',
+          'images/$localUrl.gif',
           width: 100.0,
           height: 100.0,
           fit: BoxFit.cover,
-        ),
+        )?? Center(child:Text("New Sticker")),
         margin: EdgeInsets.only(
             bottom: isLastMessageRight ? 20.0 : 8.0, right: 8.0),
       ),

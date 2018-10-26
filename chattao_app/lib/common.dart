@@ -1,5 +1,6 @@
 import 'package:chattao_app/chat_list.dart';
 import 'package:chattao_app/constants.dart';
+import 'package:chattao_app/discovery.dart';
 import 'package:chattao_app/friends.dart';
 import 'package:chattao_app/profile.dart';
 import 'package:flutter/material.dart';
@@ -22,6 +23,11 @@ class BottomBar extends StatelessWidget {
   _navToProfile() {
     Navigator.push(
         context, MaterialPageRoute(builder: (context) => ProfilePage()));
+  }
+
+  _navToDiscovery() {
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => DiscoveryPage()));
   }
 
   @override
@@ -52,11 +58,14 @@ class BottomBar extends StatelessWidget {
                     isFocused: activeIndex == 1,
                     onTap: _navToContacts),
                 NavBarItem(
-                    iconData: Icons.location_searching, title: "Discover"),
+                    isFocused: activeIndex == 2,
+                    iconData: Icons.location_searching,
+                    title: "Discover",
+                    onTap: _navToDiscovery),
                 NavBarItem(
                     iconData: Icons.portrait,
                     title: "Me",
-                    isFocused: activeIndex == 4,
+                    isFocused: activeIndex == 3,
                     onTap: _navToProfile),
               ],
             )),
@@ -99,6 +108,25 @@ class NavBarItem extends StatelessWidget {
       ),
     );
   }
+}
+
+class FadeSlideRoute extends PageRouteBuilder {
+  final Widget widget;
+  FadeSlideRoute({this.widget})
+      : super(pageBuilder: (BuildContext context, _, __) {
+          return widget;
+        }, transitionsBuilder:
+            (_, Animation<double> animation, __, Widget child) {
+          return new FadeTransition(
+            opacity: animation,
+            child: new SlideTransition(
+                position: new Tween<Offset>(
+                  begin: const Offset(0.0, 1.0),
+                  end: Offset.zero,
+                ).animate(animation),
+                child: child),
+          );
+        });
 }
 
 class ScaleRoute extends PageRouteBuilder {

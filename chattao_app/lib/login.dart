@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:chattao_app/actions/app_actions.dart';
 import 'package:chattao_app/chat_list.dart';
+import 'package:chattao_app/common.dart';
 import 'package:chattao_app/constants.dart';
 import 'package:chattao_app/models/app_state.dart';
 import 'package:chattao_app/models/chat.dart';
@@ -45,9 +46,7 @@ class _LoginPageState extends State<LoginPage> {
       var reduxStore = StoreProvider.of<AppState>(context);
       reduxStore.dispatch(UserLogined(me));
       // _dismissLoader(context);
-      Navigator.push(context, MaterialPageRoute(builder: (context) {
-        return new ChatListPage();
-      }));
+      Navigator.push(context, FadeSlideRoute(widget: new ChatListPage()));
     } else {
       // _dismissLoader(context);
       setState(() {
