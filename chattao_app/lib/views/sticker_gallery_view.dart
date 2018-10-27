@@ -3,15 +3,16 @@ import 'dart:math';
 import 'package:chattao_app/constants.dart';
 import 'package:flutter/material.dart';
 
-class StickerGallery extends StatelessWidget {
+class StickerGalleryView extends StatelessWidget {
   final Function(String, int) onStickerSelected;
-  static const _kDuration = const Duration(milliseconds: 300);
 
-  static const _kCurve = Curves.ease;
-
-  StickerGallery({@required this.onStickerSelected});
-  PageController controller =
+  final PageController controller =
       new PageController(viewportFraction: 1.0, initialPage: 0);
+
+  final _kDuration = const Duration(milliseconds: 300);
+  final _kCurve = Curves.ease;
+
+  StickerGalleryView({@required this.onStickerSelected});
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +30,6 @@ class StickerGallery extends StatelessWidget {
                 ),
                 StickerPage2(
                   onStickerSelected: onStickerSelected,
-
                 ),
                 StickerPage3(
                   onStickerSelected: onStickerSelected,
@@ -41,12 +41,12 @@ class StickerGallery extends StatelessWidget {
               right: 0.0,
               child: new Container(
                   // color: Colors.grey[800].withOpacity(0.5),
-                  padding: const EdgeInsets.only(bottom:4.0),
+                  padding: const EdgeInsets.only(bottom: 4.0),
                   child: new Center(
                     child: new DotsIndicator(
                       controller: controller,
                       itemCount: 3,
-                       color: greyColor,
+                      color: greyColor,
                       onPageSelected: (int page) {
                         controller.animateToPage(
                           page,
@@ -296,7 +296,6 @@ class StickerPage2 extends StatelessWidget {
   }
 }
 
-
 class StickerPage3 extends StatelessWidget {
   final Function(String, int) onStickerSelected;
   StickerPage3({@required this.onStickerSelected});
@@ -414,7 +413,6 @@ class StickerPage3 extends StatelessWidget {
   }
 }
 
-
 class DotsIndicator extends AnimatedWidget {
   DotsIndicator({
     this.controller,
@@ -441,7 +439,7 @@ class DotsIndicator extends AnimatedWidget {
   static const double _kDotSize = 4.0;
 
   // The increase in the size of the selected dot
-  static const double _kMaxZoom = 1.8; 
+  static const double _kMaxZoom = 1.8;
 
   // The distance between the center of each dot
   static const double _kDotSpacing = 12.0;

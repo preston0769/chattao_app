@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:chattao_app/chats.dart';
 import 'package:chattao_app/keys/global_keys.dart';
+import 'package:chattao_app/pages/chat_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -77,8 +77,8 @@ class ChatMessage {
     return imageUrl;
   }
 
-  void Delete() async {
-    final chatState = (chatScreenKey.currentState as ChatScreenState);
+  void delete() async {
+    final chatState = (chatScreenKey.currentState as InnterChatScreenState);
     chatState.chatMessages.remove(this);
     chatState.onMessageDelele();
 

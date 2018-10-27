@@ -1,4 +1,4 @@
-import 'package:chattao_app/entry.dart';
+import 'package:chattao_app/taochat_application.dart';
 import 'package:flutter/material.dart';
 
-void main() => runApp(new MyApp());
+void main() => runApp(new TaoChatApplication());

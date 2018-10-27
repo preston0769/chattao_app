@@ -1,0 +1,57 @@
+Project Targets
+    - Provide a chat app which can send image, sticker and text message to friends
+
+Functions
+    - Able to login use multiple way, google sign in, sms sign in, wechat sign in etc
+    - Able to add and remove friends
+    - Able to start a chat with friends
+    - Chat should receive notifications when friends are not online
+    - Able to send voice message
+
+Data Models(DB)
+    - User
+    - ChatMessage
+    - Chat
+    - Friends
+
+View
+    ## Ext - Element(Reusable element)
+    ## Ext - View ( Group of element)
+    ## Ext - Page (Take Whole Screen)
+
+    - ChatListView
+    - ChatMessageElement
+    - ChatView
+    - StickerGalleryView
+    - InputView
+  
+Deliverables
+    - App should have a lauch screen to display logo
+    - App should go to landing page, where app should init everything before navigate user to dedicated page
+
+    - If user not login, then didsplay login screen
+    - If user logined, then user should be navigated to chat list page
+
+    - User should login use one of the given method, if successful, register user to server, if fails, display the error message
+    - Once login successful, user should be redirect to chat list page
+
+    - User should be able to add friend by input friends id or nick name
+    - User should be able to add friend by scanning his QR code
+    - User should be able to delete a friend and his related message
+
+    - Message should be cached locally to improve start up speed
+    - Images like avatar,or image should be cached locally to reduce start time
+
+    - User should receive notification when a new message received, if he is in background or terminated
+    - User should be updated when a new message recieved if he is in foreground
+
+    - User should be navigated to the chat screen when he click on the notification page
+
+
+    
+
+    
+
+
+    
+    

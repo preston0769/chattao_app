@@ -1,4 +1,4 @@
-import 'package:chattao_app/common.dart';
+import 'package:chattao_app/views/bottombar_view.dart';
 import 'package:flutter/material.dart';
 
 class DiscoveryPage extends StatelessWidget {
@@ -11,7 +11,7 @@ class DiscoveryPage extends StatelessWidget {
           style: TextStyle(color: Colors.white),
         ),
       ),
-      bottomNavigationBar: BottomBar(
+      bottomNavigationBar: BottomBarView(
         context: context,
         activeIndex: 2,
       ),

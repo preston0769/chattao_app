@@ -1,14 +1,14 @@
-import 'package:chattao_app/chat_list.dart';
 import 'package:chattao_app/constants.dart';
-import 'package:chattao_app/discovery.dart';
-import 'package:chattao_app/friends.dart';
-import 'package:chattao_app/profile.dart';
+import 'package:chattao_app/pages/chat_list_page.dart';
+import 'package:chattao_app/pages/discovery_page.dart';
+import 'package:chattao_app/pages/friends_page.dart';
+import 'package:chattao_app/pages/profile_page.dart';
 import 'package:flutter/material.dart';
 
-class BottomBar extends StatelessWidget {
+class BottomBarView extends StatelessWidget {
   final BuildContext context;
   final int activeIndex;
-  BottomBar({@required this.context, this.activeIndex = 0});
+  BottomBarView({@required this.context, this.activeIndex = 0});
 
   _navToChatList() {
     Navigator.push(
@@ -110,65 +110,3 @@ class NavBarItem extends StatelessWidget {
   }
 }
 
-class FadeSlideRoute extends PageRouteBuilder {
-  final Widget widget;
-  FadeSlideRoute({this.widget})
-      : super(pageBuilder: (BuildContext context, _, __) {
-          return widget;
-        }, transitionsBuilder:
-            (_, Animation<double> animation, __, Widget child) {
-          return new FadeTransition(
-            opacity: animation,
-            child: new SlideTransition(
-                position: new Tween<Offset>(
-                  begin: const Offset(0.0, 1.0),
-                  end: Offset.zero,
-                ).animate(animation),
-                child: child),
-          );
-        });
-}
-
-class ScaleRoute extends PageRouteBuilder {
-  final Widget widget;
-  ScaleRoute({this.widget})
-      : super(pageBuilder: (BuildContext context, Animation<double> animation,
-            Animation<double> secondaryAnimation) {
-          return widget;
-        }, transitionsBuilder: (BuildContext context,
-            Animation<double> animation,
-            Animation<double> secondaryAnimation,
-            Widget child) {
-          return new ScaleTransition(
-            scale: new Tween<double>(
-              begin: 0.0,
-              end: 1.0,
-            ).animate(
-              CurvedAnimation(
-                parent: animation,
-                curve: Interval(
-                  0.00,
-                  0.50,
-                  curve: Curves.bounceOut,
-                ),
-              ),
-            ),
-            child: ScaleTransition(
-              scale: Tween<double>(
-                begin: 1.1,
-                end: 1.0,
-              ).animate(
-                CurvedAnimation(
-                  parent: animation,
-                  curve: Interval(
-                    0.50,
-                    1.00,
-                    curve: Curves.bounceIn,
-                  ),
-                ),
-              ),
-              child: child,
-            ),
-          );
-        });
-}

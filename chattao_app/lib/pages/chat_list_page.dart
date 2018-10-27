@@ -1,11 +1,12 @@
 import 'dart:async';
 
 import 'package:chattao_app/actions/app_actions.dart';
-import 'package:chattao_app/chats.dart';
-import 'package:chattao_app/common.dart';
 import 'package:chattao_app/controllers/chat_list_controller.dart';
 import 'package:chattao_app/models/app_state.dart';
 import 'package:chattao_app/models/chat.dart';
+import 'package:chattao_app/pages/chat_page.dart';
+import 'package:chattao_app/routes/scale_route.dart';
+import 'package:chattao_app/views/bottombar_view.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_redux/flutter_redux.dart';
@@ -42,7 +43,7 @@ class _ChatListPageState extends State<ChatListPage> {
         .first;
 
     var newRoute = new ScaleRoute(
-        widget: new ChatView(
+        widget: new ChatPage(
       peerId: peer.uid,
       peerName: peer.name,
       peerAvatar: peer.avataURL,
@@ -108,7 +109,7 @@ class _ChatListPageState extends State<ChatListPage> {
                       child: Icon(Icons.add))
                 ],
               ),
-              bottomNavigationBar: BottomBar(
+              bottomNavigationBar: BottomBarView(
                 context: context,
               ),
               backgroundColor: Color(0xFFEFEFEF),
@@ -156,7 +157,7 @@ class ChatListItem extends StatelessWidget {
     Navigator.push(
         context,
         ScaleRoute(
-            widget: new ChatView(
+            widget: new ChatPage(
           peerId: chat.peer.uid,
           peerAvatar: chat.peer.avataURL,
           peerName: chat.peer.name,

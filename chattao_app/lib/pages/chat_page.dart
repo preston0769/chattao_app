@@ -1,14 +1,16 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:math';
 
 import 'package:chattao_app/actions/app_actions.dart';
+import 'package:chattao_app/elements/avatar_element.dart';
+import 'package:chattao_app/elements/image_message_element.dart';
+import 'package:chattao_app/elements/sticker_message_element.dart';
+import 'package:chattao_app/elements/text_message_element.dart';
 import 'package:chattao_app/keys/global_keys.dart';
-import 'package:chattao_app/messages.dart';
 import 'package:chattao_app/models/app_state.dart';
 import 'package:chattao_app/models/chat.dart';
 import 'package:chattao_app/models/chat_message.dart';
-import 'package:chattao_app/sticker_gallery.dart';
+import 'package:chattao_app/views/sticker_gallery_view.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:chattao_app/constants.dart';
@@ -17,17 +19,16 @@ import 'package:flutter_redux/flutter_redux.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:redux/redux.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_native_image/flutter_native_image.dart';
 
-class ChatView extends StatelessWidget {
+class ChatPage extends StatelessWidget {
   final String peerId;
   final String peerAvatar;
   final String peerName;
 
-  ChatView(
+  ChatPage(
       {Key key,
       @required this.peerId,
       @required this.peerAvatar,
@@ -49,7 +50,7 @@ class ChatView extends StatelessWidget {
         converter: (store) {
           return store.state.friends.where((f) => f.uid == peerId).first;
         },
-        builder: (context, user) => new ChatScreen(
+        builder: (context, user) => new InnterChatScreen(
               user,
               key: chatScreenKey,
             ),
@@ -58,27 +59,22 @@ class ChatView extends StatelessWidget {
   }
 }
 
-class ChatScreen extends StatefulWidget {
+class InnterChatScreen extends StatefulWidget {
   final User peer;
-  String peerId;
-  String peerAvatar;
 
-  ChatScreen(
+  InnterChatScreen(
     this.peer, {
     Key key,
-  }) : super(key: key) {
-    peerId = peer.uid;
-    peerAvatar = peer.avataURL;
-  }
+  }) : super(key: key);
 
   @override
   State createState() =>
-      new ChatScreenState(peerId: peerId, peerAvatar: peerAvatar);
+      new InnterChatScreenState(peerId: peer.uid, peerAvatar: peer.avataURL);
 }
 
-class ChatScreenState extends State<ChatScreen> {
-  ChatScreenState(
-      {Key key, @required this.peerId, @required this.peerAvatar}) {}
+class InnterChatScreenState extends State<InnterChatScreen> {
+  InnterChatScreenState(
+      {Key key, @required this.peerId, @required this.peerAvatar});
 
   Store<AppState> reduxStore;
 
@@ -459,7 +455,7 @@ class ChatScreenState extends State<ChatScreen> {
               buildListMessage(),
               // Sticker
               (isShowSticker
-                  ? StickerGallery(onStickerSelected: onSendMessage)
+                  ? StickerGalleryView(onStickerSelected: onSendMessage)
                   : Container()),
               // Input content
               buildInput(),
@@ -636,23 +632,23 @@ class MessageItemView extends StatelessWidget {
       children: <Widget>[
         isSelf
             ? Container()
-            : ChatAvatar(
+            : AvatarElement(
                 avatarUrl: avatarUrl,
               ),
-        TextMessageContent(
+        TextMessageElement(
             message: message,
             isLastMessageRight: isLastMessageRight(index),
             highlight: isSelf),
-        ImageMessageContent(
+        ImageMessageElement(
           isLastMessageRight: isLastMessageRight(index),
           message: message,
         ),
-        StickerMessageContent(
+        StickerMessageElement(
           message: message,
           isLastMessageRight: isLastMessageRight(index),
         ),
         isSelf
-            ? ChatAvatar(
+            ? AvatarElement(
                 avatarUrl: avatarUrl,
               )
             : Container(),

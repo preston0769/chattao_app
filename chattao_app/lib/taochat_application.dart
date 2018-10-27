@@ -1,12 +1,12 @@
 import 'package:chattao_app/actions/app_actions.dart';
-import 'package:chattao_app/chats.dart';
-import 'package:chattao_app/common.dart';
+import 'package:chattao_app/constants.dart';
 import 'package:chattao_app/keys/global_keys.dart';
-import 'package:chattao_app/local_processing/local_rw.dart';
-import 'package:chattao_app/login.dart';
 import 'package:chattao_app/models/app_state.dart';
 import 'package:chattao_app/models/chat.dart';
 import 'package:chattao_app/models/chat_message.dart';
+import 'package:chattao_app/pages/chat_page.dart';
+import 'package:chattao_app/pages/login_page.dart';
+import 'package:chattao_app/routes/scale_route.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -17,10 +17,10 @@ import 'package:redux/redux.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:chattao_app/reducers/app_reducers.dart';
 
-class MyApp extends StatelessWidget {
+class TaoChatApplication extends StatelessWidget {
   final store =
       new Store<AppState>(appReducer, initialState: AppState.initial());
-  MyApp() : super(key: mainAppKey);
+  TaoChatApplication() : super(key: mainAppKey);
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +30,7 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           brightness: Brightness.light,
-          primaryColor: Color(0xFF17CDBB),
+          primaryColor: primaryColor,
         ),
         title: 'Tao Chat',
         home: MyHomePage(title: 'Tao Chat'),
@@ -51,7 +51,8 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   Widget activeScreen;
-  Store<AppState> reduxStore = (mainAppKey.currentWidget as MyApp).store;
+  Store<AppState> reduxStore =
+      (mainAppKey.currentWidget as TaoChatApplication).store;
   final FirebaseMessaging _firebaseMessaging = new FirebaseMessaging();
 
   @override
@@ -87,7 +88,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
         .first;
 
     var newRoute = new ScaleRoute(
-        widget: new ChatView(
+        widget: new ChatPage(
       peerId: peer.uid,
       peerName: peer.name,
       peerAvatar: peer.avataURL,

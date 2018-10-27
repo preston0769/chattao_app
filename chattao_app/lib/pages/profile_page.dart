@@ -1,9 +1,10 @@
 import 'dart:async';
 
-import 'package:chattao_app/common.dart';
 import 'package:chattao_app/constants.dart';
-import 'package:chattao_app/login.dart';
-import 'package:chattao_app/messages.dart';
+import 'package:chattao_app/elements/avatar_element.dart';
+import 'package:chattao_app/pages/login_page.dart';
+import 'package:chattao_app/routes/scale_route.dart';
+import 'package:chattao_app/views/bottombar_view.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -90,7 +91,6 @@ class _ProfilePageState extends State<ProfilePage> {
           : Scaffold(
               backgroundColor: greyColor2,
               appBar: AppBar(
-                backgroundColor: themeColor,
                 title: Text(
                   "Profile",
                   style: TextStyle(color: Colors.white),
@@ -108,7 +108,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         children: <Widget>[
                           ClipRRect(
                             borderRadius: BorderRadius.circular(8.0),
-                            child: ChatAvatar(
+                            child: AvatarElement(
                               avatarUrl: myAvatar.length > 0 ? myAvatar : null,
                               widgetHeight: 64.0,
                             ),
@@ -178,7 +178,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   ],
                 ),
               ),
-              bottomNavigationBar: BottomBar(
+              bottomNavigationBar: BottomBarView(
                 context: context,
                 activeIndex: 3,
               ),

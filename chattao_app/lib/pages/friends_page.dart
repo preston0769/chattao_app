@@ -1,9 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chattao_app/actions/app_actions.dart';
-import 'package:chattao_app/chats.dart';
-import 'package:chattao_app/common.dart';
 import 'package:chattao_app/models/app_state.dart';
 import 'package:chattao_app/models/chat.dart';
+import 'package:chattao_app/pages/chat_page.dart';
+import 'package:chattao_app/routes/scale_route.dart';
+import 'package:chattao_app/views/bottombar_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 
@@ -65,7 +66,7 @@ class _FriendsPageState extends State<FriendsPage> {
           ),
         ],
       ),
-      bottomNavigationBar: BottomBar(
+      bottomNavigationBar: BottomBarView(
         context: context,
         activeIndex: 1,
       ),
@@ -82,7 +83,7 @@ class ContactItemView extends StatelessWidget {
     Navigator.push(
         context,
         new ScaleRoute(
-            widget: new ChatView(
+            widget: new ChatPage(
           peerId: contact.uid,
           peerAvatar: contact.avataURL,
           peerName: contact.name,
