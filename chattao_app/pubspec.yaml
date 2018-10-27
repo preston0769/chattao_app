@@ -89,6 +89,15 @@ flutter:
      - images/gifs/miao/miao8.gif
      - images/gifs/miao/miao9.gif
 
+     - images/icons/chats_active.png
+     - images/icons/chats_outline.png
+     - images/icons/contacts_active.png
+     - images/icons/contacts_outline.png
+     - images/icons/discover_active.png
+     - images/icons/discover_outline.png
+     - images/icons/profile_active.png
+     - images/icons/profile_outline.png
+
   #  - images/a_dot_burr.jpeg
   #  - images/a_dot_ham.jpeg
 

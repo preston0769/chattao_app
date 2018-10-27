@@ -6,6 +6,7 @@ class DiscoveryPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        elevation: 0.0,
         title: Text(
           "Discovery",
           style: TextStyle(color: Colors.white),

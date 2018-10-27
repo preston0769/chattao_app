@@ -90,6 +90,7 @@ class _ChatListPageState extends State<ChatListPage> {
           ? Container()
           : Scaffold(
               appBar: new AppBar(
+                 elevation: 0.0,
                 centerTitle: true,
                 title: StoreConnector<AppState, InitState>(
                   converter: (store) {

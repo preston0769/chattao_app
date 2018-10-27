@@ -18,6 +18,7 @@ class _FriendsPageState extends State<FriendsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        elevation: 0.0,
         title: Text(
           "Contacts",
           style: TextStyle(color: Colors.white),

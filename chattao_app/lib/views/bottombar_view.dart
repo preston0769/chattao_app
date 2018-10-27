@@ -36,8 +36,8 @@ class BottomBarView extends StatelessWidget {
       color: Color(0xFFDCDCDC),
       child: SafeArea(
         child: Container(
-            padding: EdgeInsets.only(top: 8.0, bottom: 8.0),
-            constraints: BoxConstraints(maxHeight: 58.0),
+            padding: EdgeInsets.only(top: 8.0 ),
+            constraints: BoxConstraints(maxHeight: 52.0),
             decoration: BoxDecoration(
                 border: Border(
                     top: BorderSide(
@@ -48,22 +48,22 @@ class BottomBarView extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
                 NavBarItem(
-                    iconData: Icons.chat,
+                    iconName: "chats",
                     title: "Chat",
                     isFocused: activeIndex == 0,
                     onTap: _navToChatList),
                 NavBarItem(
-                    iconData: Icons.import_contacts,
+                    iconName: "contacts",
                     title: "Contacts",
                     isFocused: activeIndex == 1,
                     onTap: _navToContacts),
                 NavBarItem(
                     isFocused: activeIndex == 2,
-                    iconData: Icons.location_searching,
+                    iconName: "discover",
                     title: "Discover",
                     onTap: _navToDiscovery),
                 NavBarItem(
-                    iconData: Icons.portrait,
+                    iconName: "profile",
                     title: "Me",
                     isFocused: activeIndex == 3,
                     onTap: _navToProfile),
@@ -75,19 +75,20 @@ class BottomBarView extends StatelessWidget {
 }
 
 class NavBarItem extends StatelessWidget {
-  final IconData iconData;
+  final String iconName;
   final String title;
   final bool isFocused;
   final VoidCallback onTap;
 
   NavBarItem(
-      {@required this.iconData,
+      {@required this.iconName,
       @required this.title,
       this.isFocused = false,
       this.onTap});
 
   @override
   Widget build(BuildContext context) {
+    var iconname = iconName + (isFocused ? "_active" : "_outline");
     return InkWell(
       onTap: isFocused ? () {} : onTap ?? onTap,
       onLongPress: isFocused ? () {} : onTap ?? onTap,
@@ -95,8 +96,9 @@ class NavBarItem extends StatelessWidget {
       child: Container(
         child: Column(
           children: <Widget>[
-            Icon(
-              iconData,
+            ImageIcon(
+              AssetImage("images/icons/$iconname.png"),
+              size: 24.0,
               color: isFocused ? themeColor : Colors.black.withAlpha(160),
             ),
             Text(title,
@@ -109,4 +111,3 @@ class NavBarItem extends StatelessWidget {
     );
   }
 }
-
