@@ -67,6 +67,12 @@ AppState appReducer(AppState state, action) {
     return state;
   }
 
+  if(action is UpdateUserNameAction){
+    state.me.name = action.newUsername;
+    state.me.nickName = action.newUsername;
+    return state;
+  }
+
   if(action is SendNewMessageAction){
     state.chatListCtrler.updateChatList(action.peer, action.message);
     return state;

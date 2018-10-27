@@ -65,5 +65,9 @@ class SendNewMessageAction{
   final ChatMessage message;
 
    SendNewMessageAction(this.me,this.peer,this.message);
+}
 
+class UpdateUserNameAction{
+  final String newUsername;
+  UpdateUserNameAction(this.newUsername);
 }

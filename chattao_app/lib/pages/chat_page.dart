@@ -370,6 +370,7 @@ class InnterChatScreenState extends State<InnterChatScreen> {
       setState(() {
         // _chatMessages = _chatMessages;
       });
+      if(_chatMessages.length>1)
       listScrollController.animateTo(0.0,
           duration: Duration(milliseconds: 300), curve: Curves.easeOut);
     } else {

@@ -46,7 +46,7 @@ class _LoginPageState extends State<LoginPage> {
       var reduxStore = StoreProvider.of<AppState>(context);
       reduxStore.dispatch(UserLogined(me));
       // _dismissLoader(context);
-      Navigator.push(context, FadeSlideRoute(widget: new ChatListPage()));
+      Navigator.push(context,  PageRouteBuilder(pageBuilder:(context,_,__)=> new ChatListPage()));
     } else {
       // _dismissLoader(context);
       setState(() {

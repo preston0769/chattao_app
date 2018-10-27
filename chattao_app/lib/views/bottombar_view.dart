@@ -12,22 +12,22 @@ class BottomBarView extends StatelessWidget {
 
   _navToChatList() {
     Navigator.push(
-        context, MaterialPageRoute(builder: (context) => ChatListPage()));
+        context,  PageRouteBuilder( pageBuilder: (context,_,__) => ChatListPage(), ), );
   }
 
   _navToContacts() {
     Navigator.push(
-        context, MaterialPageRoute(builder: (context) => FriendsPage()));
+        context,  PageRouteBuilder( pageBuilder: (context,_,__) => FriendsPage(), ), );
   }
 
   _navToProfile() {
     Navigator.push(
-        context, MaterialPageRoute(builder: (context) => ProfilePage()));
+        context,  PageRouteBuilder( pageBuilder: (context,_,__) => ProfilePage(), ), );
   }
 
   _navToDiscovery() {
     Navigator.push(
-        context, MaterialPageRoute(builder: (context) => DiscoveryPage()));
+        context,  PageRouteBuilder( pageBuilder: (context,_,__) => DiscoveryPage(), ), );
   }
 
   @override
