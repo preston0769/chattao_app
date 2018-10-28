@@ -6,7 +6,9 @@ import 'package:chattao_app/models/app_state.dart';
 import 'package:chattao_app/models/chat.dart';
 import 'package:chattao_app/models/chat_message.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:redux/redux.dart';
+import 'package:flutter_app_badger/flutter_app_badger.dart';
 
 class ChatListController {
   final Store<AppState> store;
@@ -19,15 +21,17 @@ class ChatListController {
     store.state.chatListCtrler = this;
   }
 
-  updateChatList(User peer, ChatMessage lastMsg) {
-    var chat = store.state.chats.where((chat) => chat.peer == peer).first;
-    if (chat != null) {
+  updateMsgToServer(User peer, ChatMessage lastMsg) async {
+    var chatExists = store.state.chats.any((chat) => chat.peer == peer);
+    if (chatExists) {
+      var chat = store.state.chats.where((chat) => chat.peer == peer).first;
       chat.lastUpdated =
           DateTime.fromMillisecondsSinceEpoch(int.parse(lastMsg.timeStamp));
       chat.latestMsg = lastMsg;
     }
 
-    updateServer(lastMsg);
+    await _updateChatListOnServer(lastMsg);
+    // _updateNewMsgToServer(lastMsg);
   }
 
   saveToLocal() async {
@@ -80,10 +84,21 @@ class ChatListController {
 
       store.dispatch(UpdateChatListAction(chats));
       saveToLocal();
+      try {
+        FlutterAppBadger.isAppBadgeSupported().then((supported) {
+          if (supported) {
+            var count = 0;
+            chats.forEach((chat) {
+              count = count + chat.unreadMessage;
+            });
+            FlutterAppBadger.updateBadgeCount(count);
+          }
+        });
+      } catch (ex) {}
     });
   }
 
-  updateServer(ChatMessage lastMsg) {
+  Future _updateChatListOnServer(ChatMessage lastMsg) {
     var idFrom = lastMsg.idFrom;
     var idTo = lastMsg.idTo;
     var type = lastMsg.type;
@@ -102,7 +117,7 @@ class ChatListController {
     var contentShort =
         type == 1 ? "[Image]" : type == 2 ? "[Sticker]" : content;
     chatListReference.get().then((message) {
-      if (message.data.length > 0) {
+      if (message.data != null && message.data.length > 0) {
         Firestore.instance.runTransaction((transaction) async {
           await transaction.update(
             chatListReference,
@@ -122,6 +137,92 @@ class ChatListController {
           'lastmsg': contentShort,
         });
       }
+
+      // Update new message to server
+      () async {
+        lastMsg.syncing = true;
+        // if (lastMsg.type == 1 && lastMsg.localImageFile != null)
+        // lastMsg.content = await _uploadFile(lastMsg);
+        var documentReference = Firestore.instance
+            .collection('messages')
+            .document(chatId)
+            .collection(chatId)
+            .document(DateTime.now().millisecondsSinceEpoch.toString());
+
+        Firestore.instance.runTransaction((transaction) async {
+          await transaction.set(
+            documentReference,
+            {
+              'idFrom': idFrom,
+              'idTo': idTo,
+              'timestamp': lastMsg.timeStamp,
+              'content': lastMsg.content,
+              'type': lastMsg.type
+            },
+          );
+
+          lastMsg.syncing = false;
+          lastMsg.synced = true;
+        });
+      }();
     });
+  }
+
+  Future _updateNewMsgToServer(ChatMessage newMsg) async {
+    try {
+      var idFrom = newMsg.idFrom;
+      var idTo = newMsg.idTo;
+      var chatId = "";
+      if (idFrom.hashCode <= idTo.hashCode) {
+        chatId = '$idFrom-$idTo';
+      } else {
+        chatId = '$idTo-$idFrom';
+      }
+
+      newMsg.syncing = true;
+      if (newMsg.type == 1 && newMsg.localImageFile != null)
+        newMsg.content = await _uploadFile(newMsg);
+      var documentReference = Firestore.instance
+          .collection('messages')
+          .document(chatId)
+          .collection(chatId)
+          .document(DateTime.now().millisecondsSinceEpoch.toString());
+
+      Firestore.instance.runTransaction((transaction) async {
+        await transaction.set(
+          documentReference,
+          {
+            'idFrom': idFrom,
+            'idTo': idTo,
+            'timestamp': newMsg.timeStamp,
+            'content': newMsg.content,
+            'type': newMsg.type
+          },
+        );
+
+        newMsg.syncing = false;
+        newMsg.synced = true;
+      });
+    } catch (error) {
+      print(error);
+      newMsg.syncing = false;
+      newMsg.synced = true;
+      return;
+    }
+    newMsg.synced = true;
+  }
+
+  Future<String> _uploadFile(ChatMessage newMsg) async {
+    String fileName = DateTime.now().millisecondsSinceEpoch.toString();
+    newMsg.serverFileName = fileName;
+
+    StorageReference reference = FirebaseStorage.instance.ref().child(fileName);
+    StorageUploadTask uploadTask = reference.putFile(newMsg.localImageFile);
+
+    Uri downloadUrl = (await uploadTask.future).downloadUrl;
+    var imageUrl = downloadUrl.toString();
+    newMsg.localImageFile.delete();
+
+    return imageUrl;
   }
 }

@@ -3,12 +3,14 @@ import 'dart:async';
 import 'package:chattao_app/actions/app_actions.dart';
 import 'package:chattao_app/constants.dart';
 import 'package:chattao_app/elements/avatar_element.dart';
+import 'package:chattao_app/local_processing/local_rw.dart';
 import 'package:chattao_app/models/app_state.dart';
 import 'package:chattao_app/models/chat.dart';
 import 'package:chattao_app/pages/login_page.dart';
 import 'package:chattao_app/routes/scale_route.dart';
 import 'package:chattao_app/server_handler/update_username_handler.dart';
 import 'package:chattao_app/views/bottombar_view.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
@@ -63,6 +65,7 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   void initState() {
     super.initState();
+
   }
 
   _handleLogout(BuildContext context) async {
@@ -73,6 +76,7 @@ class _ProfilePageState extends State<ProfilePage> {
     await googleSignIn.signOut();
     await firebaseAuth.signOut();
     await prefs.clear();
+    await clearLocal(); 
     Navigator.popUntil(
         context, ModalRoute.withName(Navigator.defaultRouteName));
     Navigator.push(context, new ScaleRoute(widget: LoginPage()));

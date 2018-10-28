@@ -1,10 +1,8 @@
-import 'dart:async';
 import 'dart:io';
 
 import 'package:chattao_app/keys/global_keys.dart';
 import 'package:chattao_app/pages/chat_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 
 class ChatMessage {
@@ -64,18 +62,6 @@ class ChatMessage {
         'syncFailed': syncFailed,
       };
 
-  Future<String> _uploadFile() async {
-    String fileName = DateTime.now().millisecondsSinceEpoch.toString();
-    serverFileName = fileName;
-
-    StorageReference reference = FirebaseStorage.instance.ref().child(fileName);
-    StorageUploadTask uploadTask = reference.putFile(localImageFile);
-
-    Uri downloadUrl = (await uploadTask.future).downloadUrl;
-    var imageUrl = downloadUrl.toString();
-
-    return imageUrl;
-  }
 
   void delete() async {
     final chatState = (chatScreenKey.currentState as InnterChatScreenState);
@@ -93,43 +79,7 @@ class ChatMessage {
         .collection(message.chatId)
         .document(message.documentId);
     documentReference.delete();
-
-    // Firestore.instance.runTransaction((transaction) async {
-    //   await transaction.delete(documentReference);
-    // });
   }
 
-  Future syncToServer() async {
-    try {
-      syncing = true;
-      if (type == 1 && localImageFile != null) content = await _uploadFile();
-      var documentReference = Firestore.instance
-          .collection('messages')
-          .document(chatId)
-          .collection(chatId)
-          .document(DateTime.now().millisecondsSinceEpoch.toString());
-
-      Firestore.instance.runTransaction((transaction) async {
-        await transaction.set(
-          documentReference,
-          {
-            'idFrom': idFrom,
-            'idTo': idTo,
-            'timestamp': this.timeStamp,
-            'content': content,
-            'type': type
-          },
-        );
-
-        syncing = false;
-        synced = true;
-      });
-    } catch (error) {
-      print(error);
-      syncing = false;
-      syncFailed = true;
-      return;
-    }
-    synced = true;
-  }
+  
 }

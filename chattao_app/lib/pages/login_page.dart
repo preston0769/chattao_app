@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'package:chattao_app/actions/app_actions.dart';
 import 'package:chattao_app/constants.dart';
+import 'package:chattao_app/controllers/login_controller.dart';
 import 'package:chattao_app/models/app_state.dart';
 import 'package:chattao_app/models/chat.dart';
 import 'package:chattao_app/pages/chat_list_page.dart';
 import 'package:chattao_app/pages/smsLogin_page.dart';
-import 'package:chattao_app/routes/fadeslide_route.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -14,10 +14,6 @@ import 'package:flutter_redux/flutter_redux.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
-final GoogleSignIn googleSignIn = new GoogleSignIn(
-    scopes: ['email', 'https://www.googleapis.com/auth/contacts.readonly'],
-    signInOption: SignInOption.standard);
 
 class LoginPage extends StatefulWidget {
   @override
@@ -26,10 +22,22 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   var initialized = false;
+  var loginController = new LoginController();
+
 
   @override
   initState() {
     super.initState();
+
+    loginController.addListener((){
+      if(loginController.status == LoginStatusEnum.StartLogin){
+        _showLoader(context);
+      }
+      if(loginController.status ==  LoginStatusEnum.Done){
+        _dismissLoader(context);
+      }
+
+    });
     readLocal();
   }
 
@@ -44,7 +52,7 @@ class _LoginPageState extends State<LoginPage> {
       me.nickName = prefs.getString('name');
 
       var reduxStore = StoreProvider.of<AppState>(context);
-      reduxStore.dispatch(UserLogined(me));
+      reduxStore.dispatch(UserLoginedAction(me));
       // _dismissLoader(context);
       Navigator.push(context,  PageRouteBuilder(pageBuilder:(context,_,__)=> new ChatListPage()));
     } else {
@@ -70,104 +78,6 @@ class _LoginPageState extends State<LoginPage> {
 
   _dismissLoader(BuildContext context) {
     Navigator.of(context, rootNavigator: true).pop();
-  }
-
-  Future addDeviceTokenIfNotExists(
-      FirebaseUser firebaseUser, BuildContext context) async {
-    var reduxStore = StoreProvider.of<AppState>(context);
-    var token = reduxStore.state.pushNotificationToken;
-
-    if (token == null) token = await FirebaseMessaging().getToken();
-
-    final QuerySnapshot result = await Firestore.instance
-        .collection('devicetokens')
-        .where('userId', isEqualTo: firebaseUser.uid)
-        .getDocuments();
-    final List<DocumentSnapshot> documents = result.documents;
-    if (documents.length == 0) {
-      // Update data to server if new user
-      Firestore.instance
-          .collection('devicetokens')
-          .document(firebaseUser.uid)
-          .setData({
-        'token': token,
-        'createdTime': DateTime.now().millisecondsSinceEpoch.toString(),
-        'deleted': false,
-        'uid': firebaseUser.uid
-      });
-    } else {
-      Firestore.instance
-          .collection('devicetokens')
-          .document(firebaseUser.uid)
-          .updateData({
-        'token': token,
-      });
-    }
-  }
-
-  _handleGoogleLogin(BuildContext context) async {
-    googleSignIn.scopes
-        .addAll(['email', 'https://www.googleapis.com/auth/contacts.readonly']);
-    GoogleSignInAccount googleUser = await googleSignIn.signIn();
-
-    if (googleUser == null) return;
-
-    GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-
-    if (googleAuth == null) {
-      return;
-    }
-    _showLoader(context);
-    FirebaseUser firebaseUser = await firebaseAuth.signInWithGoogle(
-      accessToken: googleAuth.accessToken,
-      idToken: googleAuth.idToken,
-    );
-
-    if (firebaseUser != null) {
-      var prefs = await SharedPreferences.getInstance();
-
-      await _addUserToDBIfNotExists(firebaseUser);
-
-      await addDeviceTokenIfNotExists(firebaseUser, context);
-
-      User me = new User(firebaseUser.uid);
-      me.avataURL = firebaseUser.photoUrl;
-      me.name = firebaseUser.displayName;
-      me.nickName = firebaseUser.displayName;
-
-      var reduxStore = StoreProvider.of<AppState>(context);
-      reduxStore.dispatch(UserLogined(me));
-
-      await prefs.setString('id', firebaseUser.uid);
-      await prefs.setString('name', firebaseUser.displayName);
-      await prefs.setString('photoUrl', firebaseUser.photoUrl);
-      _dismissLoader(context);
-      Navigator.push(context, MaterialPageRoute(builder: (context) {
-        return new ChatListPage();
-      }));
-    } else {
-      _dismissLoader(context);
-    }
-  }
-
-  Future _addUserToDBIfNotExists(FirebaseUser firebaseUser) async {
-    final QuerySnapshot result = await Firestore.instance
-        .collection('users')
-        .where('id', isEqualTo: firebaseUser.uid)
-        .getDocuments();
-    final List<DocumentSnapshot> documents = result.documents;
-    if (documents.length == 0) {
-      // Update data to server if new user
-      Firestore.instance
-          .collection('users')
-          .document(firebaseUser.uid)
-          .setData({
-        'isOnline': true,
-        'name': firebaseUser.displayName,
-        'photoUrl': firebaseUser.photoUrl,
-        'id': firebaseUser.uid
-      });
-    }
   }
 
   @override
@@ -198,7 +108,7 @@ class _LoginPageState extends State<LoginPage> {
                         padding: EdgeInsets.all(16.0),
                         color: themeColor,
                         onPressed: () async {
-                          await _handleGoogleLogin(context);
+                          await  loginController.handleGoogleLogin(context);
                         },
                         child: Text(
                           "Sign in with Google",

@@ -1,9 +1,11 @@
 import 'package:chattao_app/constants.dart';
+import 'package:chattao_app/models/app_state.dart';
 import 'package:chattao_app/pages/chat_list_page.dart';
 import 'package:chattao_app/pages/discovery_page.dart';
 import 'package:chattao_app/pages/friends_page.dart';
 import 'package:chattao_app/pages/profile_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_redux/flutter_redux.dart';
 
 class BottomBarView extends StatelessWidget {
   final BuildContext context;
@@ -12,22 +14,38 @@ class BottomBarView extends StatelessWidget {
 
   _navToChatList() {
     Navigator.push(
-        context,  PageRouteBuilder( pageBuilder: (context,_,__) => ChatListPage(), ), );
+      context,
+      PageRouteBuilder(
+        pageBuilder: (context, _, __) => ChatListPage(),
+      ),
+    );
   }
 
   _navToContacts() {
     Navigator.push(
-        context,  PageRouteBuilder( pageBuilder: (context,_,__) => FriendsPage(), ), );
+      context,
+      PageRouteBuilder(
+        pageBuilder: (context, _, __) => FriendsPage(),
+      ),
+    );
   }
 
   _navToProfile() {
     Navigator.push(
-        context,  PageRouteBuilder( pageBuilder: (context,_,__) => ProfilePage(), ), );
+      context,
+      PageRouteBuilder(
+        pageBuilder: (context, _, __) => ProfilePage(),
+      ),
+    );
   }
 
   _navToDiscovery() {
     Navigator.push(
-        context,  PageRouteBuilder( pageBuilder: (context,_,__) => DiscoveryPage(), ), );
+      context,
+      PageRouteBuilder(
+        pageBuilder: (context, _, __) => DiscoveryPage(),
+      ),
+    );
   }
 
   @override
@@ -36,7 +54,7 @@ class BottomBarView extends StatelessWidget {
       color: Color(0xFFDCDCDC),
       child: SafeArea(
         child: Container(
-            padding: EdgeInsets.only(top: 8.0 ),
+            padding: EdgeInsets.only(top: 8.0),
             constraints: BoxConstraints(maxHeight: 52.0),
             decoration: BoxDecoration(
                 border: Border(
@@ -47,11 +65,21 @@ class BottomBarView extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
-                NavBarItem(
-                    iconName: "chats",
-                    title: "Chat",
-                    isFocused: activeIndex == 0,
-                    onTap: _navToChatList),
+                StoreConnector<AppState, int>(
+                   converter:  (store){
+                      int count =0;
+                      store.state.chats.forEach((chat){
+                        count  = count + chat.unreadMessage;
+                      });
+                      return count;
+                   },
+                  builder: (context, count) => NavBarItem(
+                      iconName: "chats",
+                      title: "Chat",
+                      isFocused: activeIndex == 0,
+                      notificaton: count,
+                      onTap: _navToChatList),
+                ),
                 NavBarItem(
                     iconName: "contacts",
                     title: "Contacts",
@@ -78,13 +106,17 @@ class NavBarItem extends StatelessWidget {
   final String iconName;
   final String title;
   final bool isFocused;
+  final int notificaton;
   final VoidCallback onTap;
+  final double notificationSize;
 
   NavBarItem(
       {@required this.iconName,
       @required this.title,
       this.isFocused = false,
-      this.onTap});
+      this.onTap,
+      this.notificaton = 0,
+      this.notificationSize = 12.0});
 
   @override
   Widget build(BuildContext context) {
@@ -96,11 +128,39 @@ class NavBarItem extends StatelessWidget {
       child: Container(
         child: Column(
           children: <Widget>[
-            ImageIcon(
-              AssetImage("images/icons/$iconname.png"),
-              size: 24.0,
-              color: isFocused ? themeColor : Colors.black.withAlpha(160),
-            ),
+            Stack(children: <Widget>[
+              ImageIcon(
+                AssetImage("images/icons/$iconname.png"),
+                size: 24.0,
+                color: isFocused ? themeColor : Colors.black.withAlpha(160),
+              ),
+              notificaton == 0
+                  ? Container()
+                  : Positioned(
+                      right: 0.0,
+                      top: 0.0,
+                      child: Transform(
+                        transform: Matrix4.translationValues(
+                            notificationSize / 2, -notificationSize / 2, 0.0),
+                        child: Container(
+                          height: notificationSize,
+                          width: notificationSize,
+                          child: notificaton < 0
+                              ? Container()
+                              : Center(
+                                  child: Text(
+                                  notificaton.toString(),
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 8.0),
+                                )),
+                          decoration: BoxDecoration(
+                              borderRadius:
+                                  BorderRadius.circular(notificationSize / 2),
+                              color: Colors.red),
+                        ),
+                      ),
+                    )
+            ]),
             Text(title,
                 style: TextStyle(
                   color: isFocused ? themeColor : Colors.black.withAlpha(160),

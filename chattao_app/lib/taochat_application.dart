@@ -4,12 +4,15 @@ import 'package:chattao_app/keys/global_keys.dart';
 import 'package:chattao_app/models/app_state.dart';
 import 'package:chattao_app/models/chat.dart';
 import 'package:chattao_app/models/chat_message.dart';
+import 'package:chattao_app/pages/chat_list_page.dart';
 import 'package:chattao_app/pages/chat_page.dart';
 import 'package:chattao_app/pages/login_page.dart';
 import 'package:chattao_app/routes/scale_route.dart';
+import 'package:chattao_app/routes/slide_route.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_app_badger/flutter_app_badger.dart';
 import 'dart:async';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:redux/redux.dart';
@@ -64,6 +67,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   }
 
   Future _getAllFriends(User me) async {
+    Completer completer = new Completer();
     Firestore.instance.collection('users').snapshots().listen((snapshot) {
       List<User> friends = new List();
       snapshot.documents.forEach((document) {
@@ -79,7 +83,9 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
       // reduxStore.dispatch(UpdateStatusAction("In get all friends"));
 
       reduxStore.dispatch(UpdateFriends(friends));
+      if (!completer.isCompleted) completer.complete();
     });
+    return completer.future;
   }
 
   void _handleJumpOver() {
@@ -164,6 +170,20 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.paused) {
+      try {
+        FlutterAppBadger.isAppBadgeSupported().then((supported) {
+          if (supported) {
+            var count = 0;
+            reduxStore.state.chats.forEach((chat) {
+              count = count + chat.unreadMessage;
+            });
+            FlutterAppBadger.updateBadgeCount(count);
+          }
+        });
+      } catch (ex) {}
+    }
     print(state);
   }
 
@@ -179,11 +199,21 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     super.dispose();
   }
 
+  _getMyInfo(User me) {
+    Firestore.instance
+        .collection('users')
+        .document(me.uid)
+        .snapshots()
+        .listen((document) {
+      reduxStore.dispatch(UpdateUserNameAction(document["name"]));
+    });
+  }
+
   void _onAppStateChange(AppState state) async {
     if (!state.listenerRegistered && state.logined) {
       reduxStore.dispatch(CloudListenerRegistered());
       await _getAllFriends(state.me);
-      // _listenToChatListChange(state.me);
+      await _getMyInfo(state.me);
     }
   }
 }

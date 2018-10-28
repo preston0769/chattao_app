@@ -28,7 +28,7 @@ dependencies:
   firebase_messaging: ^2.0.2
   flutter_redux: ^0.5.2
   redux: ^3.0.0
-  # image: ^2.0.4
+  flutter_app_badger: ^1.0.2
   flutter_native_image:
     git: https://github.com/btastic/flutter_native_image.git
 

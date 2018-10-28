@@ -35,7 +35,7 @@ AppState appReducer(AppState state, action) {
     return state;
   }
 
-  if (action is UserLogined) {
+  if (action is UserLoginedAction) {
     state.logined = true;
     state.me = action.me;
     return state;
@@ -74,7 +74,7 @@ AppState appReducer(AppState state, action) {
   }
 
   if(action is SendNewMessageAction){
-    state.chatListCtrler.updateChatList(action.peer, action.message);
+   state.chatListCtrler.updateMsgToServer(action.peer, action.message);
     return state;
   }
 

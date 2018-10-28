@@ -4,6 +4,7 @@ import 'package:chattao_app/models/app_state.dart';
 import 'package:chattao_app/models/chat.dart';
 import 'package:chattao_app/pages/chat_page.dart';
 import 'package:chattao_app/routes/scale_route.dart';
+import 'package:chattao_app/routes/slide_route.dart';
 import 'package:chattao_app/views/bottombar_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
@@ -83,7 +84,7 @@ class ContactItemView extends StatelessWidget {
   void _navToChatPage() {
     Navigator.push(
         context,
-        new ScaleRoute(
+        new SlideRoute(
             widget: new ChatPage(
           peerId: contact.uid,
           peerAvatar: contact.avataURL,

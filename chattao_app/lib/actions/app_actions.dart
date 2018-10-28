@@ -26,10 +26,10 @@ class LoadActiveChatsFinishedAction{
   LoadActiveChatsFinishedAction(this.chats);
 }
 
-class UserLogined{
+class UserLoginedAction{
   final User me;
   
-  UserLogined(this.me);
+  UserLoginedAction(this.me);
 }
 
 class CloudListenerRegistered{

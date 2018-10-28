@@ -6,6 +6,7 @@ import 'package:chattao_app/models/app_state.dart';
 import 'package:chattao_app/models/chat.dart';
 import 'package:chattao_app/pages/chat_page.dart';
 import 'package:chattao_app/routes/scale_route.dart';
+import 'package:chattao_app/routes/slide_route.dart';
 import 'package:chattao_app/views/bottombar_view.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -19,19 +20,8 @@ class ChatListPage extends StatefulWidget {
 }
 
 class _ChatListPageState extends State<ChatListPage> {
-  String uid;
-  bool initialized = false;
-  SharedPreferences prefs;
   StreamSubscription onceOffSub;
-
-  Future readLocal() async {
-    var prefs = await SharedPreferences.getInstance();
-    uid = prefs.getString('id') ?? 'uid-xxxx';
-
-    setState(() {
-      initialized = true;
-    });
-  }
+  StreamSubscription onceOffSub2;
 
   void _handleJumpOver() {
     var reduxStore = StoreProvider.of<AppState>(context);
@@ -42,7 +32,7 @@ class _ChatListPageState extends State<ChatListPage> {
             friend.uid == reduxStore.state.targetPeerId.trim().toString())
         .first;
 
-    var newRoute = new ScaleRoute(
+    var newRoute = new SlideRoute(
         widget: new ChatPage(
       peerId: peer.uid,
       peerName: peer.name,
@@ -64,8 +54,18 @@ class _ChatListPageState extends State<ChatListPage> {
       var reduxStore = StoreProvider.of<AppState>(context);
       var controller = new ChatListController(reduxStore);
       controller.readFromLocal().then((_) {
-        controller.streamFromServer();
-        setState(() {});
+        if (reduxStore.state.friends.length > 1) {
+          controller.streamFromServer();
+        } else {
+          onceOffSub2 = reduxStore.onChange.listen((state) {
+            if (state.friends.length > 1) {
+              () {
+                onceOffSub2.cancel();
+                controller.streamFromServer();
+              }();
+            }
+          });
+        }
       });
 
       if (reduxStore.state.targetPeerId == null ||
@@ -80,71 +80,69 @@ class _ChatListPageState extends State<ChatListPage> {
       } else
         _handleJumpOver();
     });
-    readLocal();
   }
 
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      child: !initialized
-          ? Container()
-          : Scaffold(
-              appBar: new AppBar(
-                 elevation: 0.0,
-                centerTitle: true,
-                title: StoreConnector<AppState, InitState>(
-                  converter: (store) {
-                    return store.state.initState;
-                  },
-                  builder: (content, state) {
-                    return new Text(
-                      state == InitState.Inited ? "TaoChat" : "Loading",
-                      style: TextStyle(color: Colors.white),
-                    );
-                  },
-                ),
-                leading: Container(),
-                actions: <Widget>[
-                  Padding(
-                      padding: EdgeInsets.only(right: 16.0),
-                      child: Icon(Icons.add))
-                ],
+      child: Scaffold(
+        appBar: new AppBar(
+          elevation: 0.0,
+          centerTitle: true,
+          title: StoreConnector<AppState, InitState>(
+            onInit: (store) {
+              print(store.state.friends);
+            },
+            converter: (store) {
+              return store.state.initState;
+            },
+            builder: (content, state) {
+              return new Text(
+                state == InitState.Inited ? "TaoChat" : "Loading",
+                style: TextStyle(color: Colors.white),
+              );
+            },
+          ),
+          leading: Container(),
+          actions: <Widget>[
+            Padding(
+                padding: EdgeInsets.only(right: 16.0), child: Icon(Icons.add))
+          ],
+        ),
+        bottomNavigationBar: BottomBarView(
+          context: context,
+        ),
+        backgroundColor: Color(0xFFEFEFEF),
+        body: SafeArea(
+          child: Column(
+            children: <Widget>[
+              Expanded(
+                child: StoreConnector<AppState, List<Chat>>(converter: (store) {
+                  return store.state.chats ?? [];
+                }, builder: (context, chatList) {
+                  if (chatList.length < 1) return Container();
+                  return new ListView.builder(
+                      itemCount: chatList.length,
+                      padding: const EdgeInsets.only(top: 10.0),
+                      // itemExtent: 25.0,
+                      itemBuilder: (context, index) {
+                        return ChatListItem(chatList.elementAt(index));
+                      });
+                }),
               ),
-              bottomNavigationBar: BottomBarView(
-                context: context,
-              ),
-              backgroundColor: Color(0xFFEFEFEF),
-              body: SafeArea(
-                child: Column(
-                  children: <Widget>[
-                    Expanded(
-                      child: StoreConnector<AppState, List<Chat>>(
-                          converter: (store) {
-                        return store.state.chats;
-                      }, builder: (context, chatList) {
-                        if (chatList.length < 1) return Container();
-                        return new ListView.builder(
-                            itemCount: chatList.length,
-                            padding: const EdgeInsets.only(top: 10.0),
-                            // itemExtent: 25.0,
-                            itemBuilder: (context, index) {
-                              return ChatListItem(chatList.elementAt(index));
-                            });
-                      }),
-                    ),
-                    // StoreConnector<AppState, String>(
-                    //   converter: (store) {
-                    //     return store.state.message;
-                    //   },
-                    //   builder: (context, content) {
-                    //     return Center(
-                    //         child: new Text(content ?? "Nothing is here"));
-                    //   },
-                    // ),
-                  ],
-                ),
-              ),
-            ),
+              // StoreConnector<AppState, String>(
+              //   converter: (store) {
+              //     return store.state.message;
+              //   },
+              //   builder: (context, content) {
+              //     return Center(
+              //         child: new Text(content ?? "Nothing is here"));
+              //   },
+              // ),
+            ],
+          ),
+        ),
+      ),
       onWillPop: () {},
     );
   }
@@ -157,7 +155,7 @@ class ChatListItem extends StatelessWidget {
   void _loadChatScreen(BuildContext context, Chat chat) {
     Navigator.push(
         context,
-        ScaleRoute(
+        SlideRoute(
             widget: new ChatPage(
           peerId: chat.peer.uid,
           peerAvatar: chat.peer.avataURL,

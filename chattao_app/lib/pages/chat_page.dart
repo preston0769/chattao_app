@@ -39,7 +39,6 @@ class ChatPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
-        // leading: Container(child: Icon(Icons.arrow_back,color: Colors.white,)),
         title: new Text(
           peerName,
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
@@ -190,13 +189,7 @@ class InnterChatScreenState extends State<InnterChatScreen> {
 
     chatListReference.get().then((message) {
       if (message.data == null) {
-        chatListReference.setData({
-          'uids': [peerId, myId],
-          'lastUpdated': DateTime.now().millisecondsSinceEpoch.toString(),
-          'unread-$peerId': 0,
-          'unread-$myId': 0,
-          'lastmsg': "",
-        });
+        return;
       } else if (message.data.length > 0) {
         Firestore.instance.runTransaction((transaction) async {
           await transaction.update(
@@ -331,9 +324,6 @@ class InnterChatScreenState extends State<InnterChatScreen> {
           idTo: peerId,
           timeStamp: DateTime.now().millisecondsSinceEpoch.toString(),
           type: 1);
-      chatMsg.syncToServer().then((value) {
-        compressedFile.delete();
-      });
       _chatMessages.insert(0, chatMsg);
       reduxStore.dispatch(SendNewMessageAction(null, widget.peer, chatMsg));
 
@@ -364,15 +354,14 @@ class InnterChatScreenState extends State<InnterChatScreen> {
           type: type,
           timeStamp: DateTime.now().millisecondsSinceEpoch.toString());
 
-      chatmsg.syncToServer();
       _chatMessages.insert(0, chatmsg);
       reduxStore.dispatch(SendNewMessageAction(null, widget.peer, chatmsg));
       setState(() {
         // _chatMessages = _chatMessages;
       });
-      if(_chatMessages.length>1)
-      listScrollController.animateTo(0.0,
-          duration: Duration(milliseconds: 300), curve: Curves.easeOut);
+      if (_chatMessages.length > 1)
+        listScrollController.animateTo(0.0,
+            duration: Duration(milliseconds: 300), curve: Curves.easeOut);
     } else {
       Fluttertoast.showToast(msg: 'Nothing to send');
     }

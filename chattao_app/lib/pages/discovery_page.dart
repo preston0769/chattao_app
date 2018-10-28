@@ -17,7 +17,7 @@ class DiscoveryPage extends StatelessWidget {
         activeIndex: 2,
       ),
       body: Container(
-        child: Center(child: Text("Nothing")),
+        child: Center(child: Text("瞅啥瞅啊，啥也没有")),
       ),
     );
   }

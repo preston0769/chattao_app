@@ -1,18 +1,12 @@
 import 'dart:async';
 
-import 'package:chattao_app/actions/app_actions.dart';
 import 'package:chattao_app/constants.dart';
-import 'package:chattao_app/models/app_state.dart';
-import 'package:chattao_app/models/chat.dart';
+import 'package:chattao_app/controllers/login_controller.dart';
 import 'package:chattao_app/pages/chat_list_page.dart';
 import 'package:chattao_app/routes/scale_route.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:chattao_app/routes/slide_route.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_redux/flutter_redux.dart';
-import 'package:redux/redux.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
 
@@ -22,9 +16,7 @@ class SMSLoginPage extends StatefulWidget {
 }
 
 class _SMSLoginPageState extends State<SMSLoginPage> {
-  Future<String> _message;
-  String _testPhoneNumber;
-  String _verificationId;
+  LoginController controller;
 
   dynamic activeScreen;
   PhoneNumberInputSegment phoneNumSeg;
@@ -33,6 +25,7 @@ class _SMSLoginPageState extends State<SMSLoginPage> {
   @override
   initState() {
     super.initState();
+    controller = new LoginController();
     phoneNumSeg = new PhoneNumberInputSegment(_onPhoneInputComplete);
     smsInputSeg = new SMSCodeInputSegment(_onSmSCodeInputComplete);
     activeScreen = phoneNumSeg;
@@ -55,148 +48,19 @@ class _SMSLoginPageState extends State<SMSLoginPage> {
     Navigator.of(context, rootNavigator: true).pop();
   }
 
-  Future<String> _signInWithPhoneNum(String smsCode) async {
-    final FirebaseUser user = await firebaseAuth.signInWithPhoneNumber(
-      verificationId: _verificationId,
-      smsCode: smsCode,
-    );
-
-    final FirebaseUser firebaseUser = await firebaseAuth.currentUser();
-    assert(user.uid == firebaseUser.uid);
-
-    if (firebaseUser != null) {
-      var prefs = await SharedPreferences.getInstance();
-
-      // Check is already sign up
-      final QuerySnapshot result = await Firestore.instance
-          .collection('users')
-          .where('id', isEqualTo: firebaseUser.uid)
-          .getDocuments();
-      final List<DocumentSnapshot> documents = result.documents;
-      var name = (firebaseUser.displayName == null ||
-              firebaseUser.displayName.isEmpty)
-          ? "TaoChat_" + firebaseUser.uid.substring(firebaseUser.uid.length - 5)
-          : firebaseUser.displayName;
-      var photoURL = (firebaseUser.photoUrl == null ||
-              firebaseUser.photoUrl.isEmpty)
-          ? "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSUiD5eyL5b_4gPQ0bG9eYWJ3OAQPBk2IoIIjSTeK1uMCqrA39MYg"
-          : firebaseUser.photoUrl;
-      if (documents.length == 0) {
-        // Update data to server if new user
-        Firestore.instance
-            .collection('users')
-            .document(firebaseUser.uid)
-            .setData({
-          'isOnline': true,
-          'name': name,
-          'photoUrl': photoURL,
-          'id': firebaseUser.uid
-        });
-      }
-
-      User me = new User(firebaseUser.uid);
-      me.avataURL = firebaseUser.photoUrl;
-      me.name = firebaseUser.displayName;
-      me.nickName = firebaseUser.displayName;
-
-      var reduxStore = StoreProvider.of<AppState>(context);
-      reduxStore.dispatch(UserLogined(me));
-
-      await prefs.setString('id', firebaseUser.uid);
-      await prefs.setString('name', name);
-      await prefs.setString('photoUrl', photoURL);
-
-      await addDeviceTokenIfNotExists(firebaseUser, context);
-
-      return Future.value("");
-    }
-  }
-
-  Future addDeviceTokenIfNotExists(
-      FirebaseUser firebaseUser, BuildContext context) async {
-    Store<AppState> reduxStore = StoreProvider.of<AppState>(context);
-
-    var token = reduxStore.state.pushNotificationToken;
-    if (token == null) token = await FirebaseMessaging().getToken();
-    final QuerySnapshot result = await Firestore.instance
-        .collection('devicetokens')
-        .where('uid', isEqualTo: firebaseUser.uid)
-        .getDocuments();
-    final List<DocumentSnapshot> documents = result.documents;
-    if (documents.length == 0) {
-      // Update data to server if new user
-      Firestore.instance
-          .collection('devicetokens')
-          .document(firebaseUser.uid)
-          .setData({
-        'token': token,
-        'createdTime': DateTime.now().millisecondsSinceEpoch.toString(),
-        'deleted': false,
-        'uid': firebaseUser.uid
-      });
-    } else {
-      Firestore.instance
-          .collection('devicetokens')
-          .document(firebaseUser.uid)
-          .updateData({
-        'token': token,
-      });
-    }
-  }
-
-  _handleSmsLogin(BuildContext context) async {
-    final PhoneVerificationCompleted verificationCompleted =
-        (FirebaseUser user) {
-      setState(() {
-        _message =
-            Future<String>.value('signInWithPhoneNumber auto succeeded: $user');
-        print(_message);
-      });
-    };
-
-    final PhoneVerificationFailed verificationFailed =
-        (AuthException authException) {
-      setState(() {
-        _message = Future<String>.value(
-            'Phone number verification failed. Code: ${authException.code}. Message: ${authException.message}');
-      });
-    };
-
-    final PhoneCodeSent codeSent =
-        (String verificationId, [int forceResendingToken]) async {
-      this._verificationId = verificationId;
-      // _smsCodeController.text = testSmsCode;
+  void _onPhoneInputComplete(String phoneNum) async {
+    _showLoader(context);
+    controller.handleSmsCodeReceive(context, phoneNum, () {
       _dismissLoader(context);
       _changeToScreen(1);
-    };
-
-    final PhoneCodeAutoRetrievalTimeout codeAutoRetrievalTimeout =
-        (String verificationId) {
-      this._verificationId = verificationId;
-      // _smsCodeController.text = testSmsCode;
-    };
-
-    await firebaseAuth.verifyPhoneNumber(
-        phoneNumber: _testPhoneNumber,
-        timeout: const Duration(seconds: 5),
-        verificationCompleted: verificationCompleted,
-        verificationFailed: verificationFailed,
-        codeSent: codeSent,
-        codeAutoRetrievalTimeout: codeAutoRetrievalTimeout);
+    });
   }
 
-  void _onPhoneInputComplete(String phone) async {
+  void _onSmSCodeInputComplete(String smsCode) async {
     _showLoader(context);
-    _testPhoneNumber = phone;
-    await _handleSmsLogin(context);
-  }
-
-  void _onSmSCodeInputComplete(String code) async {
-    _showLoader(context);
-    await _signInWithPhoneNum(code);
-
+    await controller.signInWithPhoneNum(context, smsCode);
     _dismissLoader(context);
-    Navigator.push(context, ScaleRoute(widget: new ChatListPage()));
+    Navigator.push(context, SlideRoute(widget: new ChatListPage()));
   }
 
   void _changeToScreen(int index) {

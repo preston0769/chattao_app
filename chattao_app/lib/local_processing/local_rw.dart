@@ -24,6 +24,13 @@ Future<File> writeChatList(List<Chat> chatList) async {
   return file.writeAsString(jsonStr);
 }
 
+clearLocal() async {
+  final directory = await getApplicationDocumentsDirectory();
+  await directory.list().forEach((f) {
+    f.delete();
+  });
+}
+
 Future<List<Chat>> readChatList() async {
   try {
     List<Chat> chats = [];
@@ -34,7 +41,6 @@ Future<List<Chat>> readChatList() async {
 
     mapList.forEach((map) {
       chats.add(Chat.fromJson(map));
-      
     });
     return chats;
   } catch (e) {
