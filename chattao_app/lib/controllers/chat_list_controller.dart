@@ -142,7 +142,7 @@ class ChatListController {
       () async {
         lastMsg.syncing = true;
         // if (lastMsg.type == 1 && lastMsg.localImageFile != null)
-        // lastMsg.content = await _uploadFile(lastMsg);
+        lastMsg.content = await _uploadFile(lastMsg);
         var documentReference = Firestore.instance
             .collection('messages')
             .document(chatId)
