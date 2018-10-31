@@ -141,8 +141,8 @@ class ChatListController {
       // Update new message to server
       () async {
         lastMsg.syncing = true;
-        // if (lastMsg.type == 1 && lastMsg.localImageFile != null)
-        lastMsg.content = await _uploadFile(lastMsg);
+        if (lastMsg.type == 1 && lastMsg.localImageFile != null)
+          lastMsg.content = await _uploadFile(lastMsg);
         var documentReference = Firestore.instance
             .collection('messages')
             .document(chatId)
